@@ -1,0 +1,107 @@
+name: Deploy PageForge Studio
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      html_sha256: ${{ steps.checksum.outputs.html_sha256 }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run core tests
+        run: npm test
+      - name: Build the standalone editor
+        run: npm run build
+      - name: Record deployment checksum
+        id: checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s dist/index.html
+          test -f dist/.nojekyll
+          echo "html_sha256=$(sha256sum dist/index.html | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy and verify
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify the public deployment
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_SHA256: ${{ needs.build.outputs.html_sha256 }}
+          DEPLOYMENT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          url = os.environ['SITE_URL']
+          if urllib.parse.urlparse(url).scheme != 'https':
+              raise RuntimeError(f'Expected an HTTPS Pages URL, received {url!r}')
+          query = urllib.parse.urlencode({'deployment': os.environ['DEPLOYMENT_SHA']})
+          probe = url + ('&' if '?' in url else '?') + query
+          expected = os.environ['EXPECTED_SHA256']
+          for attempt in range(1, 19):
+              try:
+                  request = urllib.request.Request(probe, headers={
+                      'User-Agent': 'PageForge-Studio-deployment-verification',
+                      'Cache-Control': 'no-cache',
+                  })
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      content = response.read()
+                      actual = hashlib.sha256(content).hexdigest()
+                      if response.status == 200 and actual == expected:
+                          print(f'PASS: HTTPS 200, {len(content)} bytes, SHA-256 {actual}')
+                          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                              summary.write(f'## Published PageForge Studio\n\n{url}\n\n')
+                              summary.write(f'Verified HTTPS 200 and exact build checksum: `{actual}`.\n')
+                          break
+                      print(f'Attempt {attempt}: deployment not propagated; received SHA-256 {actual}')
+              except (urllib.error.URLError, TimeoutError) as error:
+                  print(f'Attempt {attempt}: {error}')
+              if attempt == 18:
+                  raise RuntimeError('Public Pages content did not match the built artifact')
+              time.sleep(5)
+          PY
