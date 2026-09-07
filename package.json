@@ -1,0 +1,16 @@
+{
+  "name": "pageforge-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FrontPage-inspired visual website IDE with native JavaScript and WebGPU editing overlays",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node server.mjs",
+    "test": "node --test tests/core.test.js",
+    "test:e2e": "python tests/browser_test.py"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

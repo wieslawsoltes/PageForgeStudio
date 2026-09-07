@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="PageForge Studio — a local-first visual website editor with Design, Split, Code and Preview views."><meta name="theme-color" content="#2866ad"><title>PageForge Studio</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232b66ab'/%3E%3Cpath d='M9 5h10l5 5v17H9z' fill='white'/%3E%3Cpath d='M13 14h7m-7 5h7m-7 4h5' stroke='%232b66ab' stroke-width='2'/%3E%3C/svg%3E"><style>:root{font-family:Tahoma,'Segoe UI',Arial,sans-serif;color:#263447;font-size:11px;--blue:#245caa;--blue-light:#e7effb;--border:#b9c3cf;--chrome:#f3f4f4;--muted:#79828e;--panel:#f9fafb;--title-top:#387dc5;--title-bottom:#235a9b;--pane-top:#e7edf6;--pane-bottom:#d4dfed;--active:#2f64ae;--workspace:#dfe5eb;--selection:#e2ebf9}
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#e0e5ea}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #4385d7;outline-offset:1px}
+button{border:0;background:none;padding:0}
+input,select,textarea{border:1px solid #b7c3d0;border-radius:2px;background:white}
+select{height:24px;padding:1px 22px 1px 6px}
+input{height:26px;padding:4px 7px}
+input[type=checkbox]{height:14px;width:14px;accent-color:#3474c3;vertical-align:middle}
+input[type=color]{padding:2px}
+.icon{width:17px;height:17px;flex:none;vertical-align:middle}
+.app{height:100dvh;min-width:720px;display:flex;flex-direction:column}
+.titlebar{height:35px;flex:none;background:linear-gradient(var(--title-top),var(--title-bottom));display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 8px;color:white;border-bottom:1px solid #194d86;box-shadow:inset 0 1px #ffffff30}
+.app-brand{display:flex;align-items:center;gap:9px}
+.app-logo{width:24px;height:24px;border-radius:4px;background:linear-gradient(#edf4ff,#b8d1ec);color:#245791;display:grid;place-items:center;box-shadow:0 1px 2px #13305d88}
+.app-logo .icon{width:19px;height:19px}
+.app-brand strong{font-family:'Segoe UI',Tahoma,sans-serif;letter-spacing:-.2px;font-size:14px}
+.app-brand strong span{font-weight:400;color:#d8eaff}
+.title-divider{height:16px;border-left:1px solid #ffffff44;margin:0 5px}
+.app-brand>#project-title{font-size:11px;color:#e1eafa}
+.title-right{display:flex;align-items:center;gap:13px}
+.engine-badge{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.2px;border:1px solid #ffffff33;padding:3px 7px;border-radius:3px;background:#123d671c}
+.engine-badge i{width:5px;height:5px;border-radius:50%;background:#b1f0bb;box-shadow:0 0 5px #b1f0bb55}
+.title-button{color:#e3efff;display:flex;align-items:center}
+.title-button:hover{color:#fff}
+.menubar{height:27px;background:#f1f2f3;display:flex;align-items:center;padding:0 5px;border-bottom:1px solid #d2d7de;flex:none}
+.menubar>button{height:23px;padding:0 10px;border:1px solid transparent}
+.menubar>button:hover,.menubar>button.open{background:#dce8f8;border-color:#94b0d4}
+.menu-spacer,.toolbar-stretch,.status-spacer{flex:1}
+.workspace-label{color:#909ba8;font-size:9px;letter-spacing:1.4px;padding-right:11px}
+.toolbar{height:34px;display:flex;align-items:center;gap:2px;padding:3px 9px 3px 4px;background:linear-gradient(#fafbfc,#e9ecf0);border-bottom:1px solid #bbc5d1;flex:none;overflow:hidden}
+.grip{height:20px;width:5px;border-left:1px dotted #a8b3c1;border-right:1px dotted #fff;margin-right:3px;flex:none}
+.tool{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:2px;flex:none;color:#44576e}
+.tool:hover:not(:disabled),.tool.active{border-color:#9bb6d8;background:linear-gradient(#f5f9ff,#d6e4f7)}
+.tool.active{box-shadow:inset 0 1px 3px #9eb7d04a}
+.tool .icon{width:17px;height:17px}
+.standard-toolbar [data-cmd=new]{color:#4283b0}
+.standard-toolbar [data-cmd=import]{color:#aa853b}
+.standard-toolbar [data-cmd=save]{color:#375f98}
+.standard-toolbar [data-cmd=undo],.standard-toolbar [data-cmd=redo]{color:#719266}
+.standard-toolbar [data-cmd=image]{color:#648b62}
+.separator{width:1px;height:21px;background:#c0c9d3;border-right:1px solid white;margin:0 5px;flex:none}
+.small-separator{height:17px;border-left:1px solid #d2d9e2;margin:0 7px}
+.local-indicator{color:#667a66;font-size:10px;display:flex;gap:5px;align-items:center;white-space:nowrap;margin-right:14px}
+.local-indicator .icon{width:13px;height:13px}
+.publish-button{display:flex;align-items:center;gap:7px;background:linear-gradient(#fdfefe,#e8edf4);border:1px solid #a6b7cd;border-radius:3px;height:26px;padding:0 10px;color:#28578d;white-space:nowrap;font-weight:700;font-size:10px;box-shadow:0 1px 1px #36547112}
+.publish-button:hover{background:#dce9f8}
+.publish-button span{margin-left:6px;font-size:9px}
+.format-toolbar{height:33px;background:linear-gradient(#f5f7f9,#e8ecf1);gap:3px}
+.format-toolbar #block-format{width:122px}
+.format-toolbar #font-family{width:147px}
+.format-toolbar #font-size{width:62px;padding-right:4px}
+.format-toolbar .separator{margin:0 4px}
+.format-toolbar .tool{width:24px;height:25px}
+.format-toolbar .tool .icon{width:15px;height:15px}
+.color-tool{position:relative;width:28px;height:25px;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:2px;cursor:pointer}
+.color-tool:hover{border-color:#9bb6d8;background:#dce8f7}
+.color-tool input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.color-tool>.icon{height:18px;width:18px}
+.highlight-tool{color:#98791b}
+.text-tool{white-space:nowrap;color:#627185;font-size:10px;display:flex;align-items:center;gap:6px;padding:4px}
+.text-tool .icon{height:14px;width:14px}
+.text-tool:hover{color:#245caa}
+.workspace{display:grid;grid-template-columns:64px 202px minmax(280px,1fr) 258px;flex:1;min-height:0;background:var(--chrome)}
+.views-rail{background:linear-gradient(90deg,#e6ebf2,#eff2f6);border-right:1px solid #aebacb;display:flex;flex-direction:column;padding-top:8px;gap:4px}
+.view-button{height:64px;margin:0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:3px;color:#617286;font-size:9px}
+.view-button>.icon{width:24px;height:24px;stroke-width:1.45}
+.view-button:hover{background:#e0e9f5;border-color:#bdcde1}
+.view-button.active{color:#285f9e;background:linear-gradient(#fbfdff,#d5e2f4);border-color:#9bb4d6;box-shadow:inset 0 1px 1px white}
+.rail-bottom{margin-top:auto;display:flex;justify-content:center;padding:13px 0;color:#7d8b9c}
+.rail-bottom button{width:32px;height:32px}
+.folder-pane{background:#fcfdfe;border-right:1px solid #b0bdcf;display:flex;flex-direction:column;min-width:0;min-height:0}
+.pane-heading{height:29px;display:flex;align-items:center;justify-content:space-between;padding:0 6px 0 10px;background:linear-gradient(var(--pane-top),var(--pane-bottom));border-bottom:1px solid #b5c3d5;color:#3d5574;flex:none}
+.pane-heading strong{font-size:11px;font-weight:700}
+.pane-heading>div{display:flex}
+.pane-heading .tool{height:22px;width:20px;color:#70829a}
+.pane-heading .tool .icon{width:13px;height:13px}
+.site-root{height:43px;padding:0 12px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:11px;white-space:nowrap}
+.site-root>.icon{color:#4e8e78;width:18px;height:18px}
+.site-root span{overflow:hidden;text-overflow:ellipsis}
+.file-search{height:29px;margin:0 10px 8px;position:relative;display:flex;align-items:center}
+.file-search>.icon{position:absolute;left:7px;width:12px;height:12px;color:#99a4b2}
+.file-search input{width:100%;padding-left:25px;font-size:10px;height:26px;border:1px solid #d8dee6;background:#f7f9fb;outline-offset:0}
+.file-tree{flex:1;overflow:auto;padding:4px 5px}
+.file-row,.folder-row{width:100%;height:28px;display:flex;align-items:center;text-align:left;gap:6px;white-space:nowrap;border:1px solid transparent;border-radius:2px;color:#56657a;font-size:10px;position:relative}
+.file-row span,.folder-row span{overflow:hidden;text-overflow:ellipsis}
+.file-row>.icon{width:15px;height:15px;color:#638aaa}
+.file-row.css>.icon{color:#98638f}
+.file-row.js>.icon{color:#ad8c39}
+.file-row.image>.icon{color:#6f9270}
+.file-row:hover,.folder-row:hover{background:#edf3fa}
+.file-row.active{background:#e2ebf8;color:#274f87;border-color:#c4d5ef;font-weight:700}
+.file-row .home-mark{margin-left:auto;color:#7296c2;width:12px;height:12px;margin-right:5px}
+.folder-row>.icon{color:#bba565;width:16px;height:16px}
+.folder-row .expand-arrow{font-size:8px;color:#8390a2;width:9px;flex:none}
+.folder-footer{padding:18px 12px 0;border-top:1px solid #e1e6ed;color:#778698}
+.mini-caption{font-size:8px;letter-spacing:1.2px;color:#9ba5b3;margin-bottom:12px}
+.folder-footer>button{display:flex;gap:7px;align-items:center;margin-bottom:13px;font-size:10px;color:#607ea5}
+.folder-footer>button:hover{color:#275b9e}
+.folder-footer>button .icon{width:14px;height:14px}
+.local-note{display:flex;align-items:center;gap:5px;font-size:8px;white-space:nowrap;margin:20px -12px 0;padding:12px 10px;background:#f4f7fa;color:#839283;border-top:1px solid #e4e9ee}
+.safe-dot{width:5px;height:5px;background:#7ba388;border-radius:50%;display:inline-block;flex:none}
+.document-pane{display:flex;flex-direction:column;min-width:0;min-height:0;background:#e9edf3}
+.document-tabs{height:33px;flex:none;display:flex;align-items:end;background:#d9e2ee;padding:4px 5px 0;gap:3px;border-bottom:1px solid #aebcd0;overflow:auto}
+.document-tab{height:27px;display:flex;align-items:center;gap:7px;background:linear-gradient(#edf2f8,#dfe6ef);border:1px solid #b7c5d8;border-bottom:0;padding:0 8px 0 10px;border-radius:3px 3px 0 0;white-space:nowrap;color:#697a91;font-size:10px;min-width:105px;flex:none;cursor:pointer;outline-offset:-3px}
+.document-tab>.icon{height:14px;width:14px;color:#6c8faf}
+.document-tab.active{background:#fafbfd;color:#325b93;border-top:2px solid #f0b55c;padding-top:0;height:29px;border-color:#aebed3;border-top-color:#e5ab5d;position:relative;bottom:-1px;font-weight:700}
+.document-tab.active>.icon{color:#3f75ac}
+.tab-close{margin-left:8px;width:15px;height:15px;display:grid;place-items:center;border-radius:2px;color:#8b98a9}
+.tab-close:hover{color:#304860;background:#cddbeb}
+.tab-close .icon{width:11px;height:11px}
+.tab-add{width:28px;height:27px;color:#72869f;flex:none}
+.tab-add .icon{height:14px;width:14px}
+.document-toolbar{height:37px;background:#fafbfc;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cbd4df;flex:none;padding:0 10px;gap:8px}
+.document-location{display:flex;align-items:center;gap:6px;min-width:0;font-size:10px;color:#69798c}
+.document-location>.icon{width:13px;height:13px;color:#91a4b9}
+.document-location>#document-location{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-type-badge{font-size:8px;color:#8a9aaf;border:1px solid #d7dfe9;background:#f1f5f9;padding:2px 4px;border-radius:2px;margin-left:2px;letter-spacing:.5px}
+.viewport-tools{display:flex;align-items:center;gap:2px;flex:none}
+.device-button{width:25px;height:25px;color:#90a0b1;border:1px solid transparent;border-radius:3px;display:grid;place-items:center}
+.device-button>.icon{width:15px;height:15px}
+.device-button:hover{background:#edf2f8}
+.device-button.active{color:#4171ad;background:#eaf0f9;border-color:#cedcef}
+.viewport-tools select{border-color:#d0d9e4;height:23px;font-size:9px;color:#687d95;background:#fff}
+.viewport-tools #viewport-width{width:104px;padding-right:4px}
+.viewport-tools #zoom-level{width:68px;margin-left:4px;padding-right:4px}
+.editor-workspace{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;position:relative}
+.design-stage{position:relative;overflow:auto;flex:1;min-height:0;padding:30px 24px 18px;background-color:var(--workspace);background-image:radial-gradient(#b5bfca7a .65px,transparent .65px);background-size:10px 10px}
+.sheet{position:relative;background:#fff;margin:0 auto;box-shadow:0 2px 12px #24395124,0 0 0 1px #bec9d5;isolation:isolate;min-width:200px}
+.sheet>iframe{position:absolute;left:0;top:0;border:0;background:#fff;transform-origin:top left;display:block}
+.sheet>iframe[hidden]{display:none}
+.sheet>canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.horizontal-ruler{position:absolute;left:24px;right:24px;top:0;height:17px;display:flex;align-items:start;overflow:hidden;color:#8d9aae;font:8px Tahoma;pointer-events:none;background:linear-gradient(#e4e9ee,#dbe2e9);border-bottom:1px solid #becad5}
+.horizontal-ruler span{position:absolute;top:2px;padding-left:4px;border-left:1px solid #aebdce;height:6px}
+.horizontal-ruler:after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:repeating-linear-gradient(90deg,transparent 0 9px,#b8c4d1 9px 10px)}
+.selection-label{position:absolute;z-index:5;background:#3d76ca;color:white;padding:3px 6px;font-family:Tahoma,sans-serif;font-size:9px;line-height:13px;white-space:nowrap;pointer-events:none;border-radius:2px 2px 0 0;box-shadow:0 -1px 3px #16396011}
+.resize-handle{position:absolute;width:7px;height:7px;background:#fff;border:1px solid #3d76ca;z-index:6;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #ffffff33}
+.resize-handle:hover{background:#bad3fa}
+.resize-handle[data-handle=nw],.resize-handle[data-handle=se]{cursor:nwse-resize}
+.resize-handle[data-handle=ne],.resize-handle[data-handle=sw]{cursor:nesw-resize}
+.resize-handle[data-handle=n],.resize-handle[data-handle=s]{cursor:ns-resize}
+.resize-handle[data-handle=e],.resize-handle[data-handle=w]{cursor:ew-resize}
+#resize-shield{position:absolute;inset:0;z-index:5;background:transparent}
+.preview-notice{position:sticky;bottom:0;width:max-content;margin:8px auto -10px;padding:6px 10px;font-size:9px;border:1px solid #c9d7e7;background:#f7faffed;color:#6480a1;border-radius:3px;box-shadow:0 2px 6px #48648211}
+.preview-notice .icon{width:13px;height:13px;margin-right:4px}
+.tag-bar{height:25px;background:#f7f9fc;border-top:1px solid #c4cfdd;border-bottom:1px solid #c4cfdd;display:flex;align-items:center;gap:6px;padding:0 9px;flex:none;overflow:hidden}
+.tag-caption{font-size:8px;letter-spacing:.8px;display:flex;align-items:center;gap:4px;color:#97a4b5;padding-right:7px;border-right:1px solid #dde3ec}
+.tag-caption .icon{width:13px;height:13px}
+#tag-path{display:flex;align-items:center;gap:2px;overflow:hidden}
+#tag-path button{font:10px Consolas,monospace;color:#7991b0;padding:2px 4px;white-space:nowrap}
+#tag-path button:last-child{background:#e2ebf9;color:#3869a7;border-radius:2px}
+#tag-path button:hover{background:#dbe6f6}
+#tag-path .tag-arrow{color:#b7c1ce;font-size:9px}
+#selection-dimensions{margin-left:auto;color:#92a0b2;font-size:9px;white-space:nowrap}
+.view-tabs{height:32px;display:flex;justify-content:space-between;align-items:center;flex:none;background:linear-gradient(#f5f7fa,#e8edf4);padding:0 6px;border-bottom:1px solid #bcc8d8}
+.mode-tabs{display:flex;height:29px;align-items:center;gap:3px}
+.mode-tabs>button{height:25px;display:flex;align-items:center;gap:5px;padding:0 10px;font-size:10px;border:1px solid transparent;color:#6a7e98;border-radius:2px}
+.mode-tabs>button>.icon{width:13px;height:13px}
+.mode-tabs>button:hover{background:#e1eaf5}
+.mode-tabs>button.active{background:linear-gradient(#fff,#e8effa);border-color:#a9bfdb;box-shadow:0 1px 1px #b9c8dc55;color:#285b9b;font-weight:700}
+.document-hint{font-size:9px;color:#9aa8ba;padding-right:6px;white-space:nowrap}
+.task-pane{border-left:1px solid #b1bfd2;min-width:0;min-height:0;display:flex;flex-direction:column;background:#f9fbfd}
+.inspector-tabs{height:36px;display:flex;align-items:stretch;border-bottom:1px solid #d2dbe7;padding:0 7px;gap:0;flex:none;background:#f0f4f9}
+.inspector-tabs>button{flex:1;font-size:10px;color:#8796a8;border-bottom:2px solid transparent;padding-top:2px}
+.inspector-tabs>button.active{color:#3869a4;font-weight:700;border-bottom-color:#5888c2}
+.inspector-tabs>button:hover{color:#305e98;background:#eaf0f8}
+.inspector-content{overflow:auto;flex:1;min-height:0;padding-bottom:12px}
+.inspector-footer{display:flex;align-items:center;gap:6px;padding:12px 10px;font-size:9px;color:#8d9cab;border-top:1px solid #dfe6ee;background:#f4f7fa;flex:none}
+.element-card{padding:15px 12px 12px;border-bottom:1px solid #e1e7ef;background:#fff}
+.element-identity{display:flex;align-items:center;gap:9px}
+.element-tag{font:12px Consolas,monospace;background:#e9f0fb;color:#507aaf;min-width:34px;height:32px;padding:8px;text-align:center;border:1px solid #dce6f4;border-radius:4px}
+.element-name{font-size:11px;font-weight:700;color:#4b6689;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+.element-subtitle{font-size:9px;color:#a3afbe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:174px}
+.element-actions{display:flex;align-items:center;gap:4px;margin-top:10px}
+.element-actions button{height:23px;padding:0 6px;border:1px solid #d8e1ed;border-radius:3px;color:#8a9cb2;background:linear-gradient(#fff,#f2f5fa);font-size:9px;display:flex;align-items:center;gap:4px}
+.element-actions button .icon{height:12px;width:12px}
+.element-actions button:hover{background:#e8eff9;color:#4872a5}
+.element-actions .action-danger{margin-left:auto}
+.element-actions .action-danger:hover{background:#fae9e9;color:#c16b6b}
+.property-section{padding:0 12px 11px;border-bottom:1px solid #e4e9f0}
+.property-heading{font-size:8px;letter-spacing:1.2px;color:#8e9eb2;font-weight:700;margin:14px 0 12px;display:flex;justify-content:space-between}
+.property-row{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:7px;margin:6px 0;font-size:9px;color:#8797aa}
+.property-row>input,.property-row>select{height:24px;width:100%;font-size:10px;color:#5d738e;border-color:#d8e1eb;border-radius:3px;background:#fff;padding-left:7px;min-width:0}
+.property-row input::placeholder{color:#a7b3c2}
+.property-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.property-pair .property-row{grid-template-columns:30px 1fr;gap:4px}
+.property-pair input{width:100%;min-width:0}
+.property-color{display:flex;gap:5px}
+.property-color input[type=color]{width:26px;height:24px;flex:none;border-color:#d8e1eb;border-radius:3px;padding:3px}
+.property-color input[type=text]{width:100%;min-width:0;height:24px;border-color:#d8e1eb;font-size:10px;color:#7890af}
+.box-model{margin:12px 0 4px;border:1px dashed #d9c7a4;background:#f8f2e6;text-align:center;position:relative;padding:15px 20px;color:#b4a07a;font-size:8px}
+.box-model .box-label{position:absolute;top:3px;left:5px;letter-spacing:.3px}
+.padding-box{border:1px dashed #b9cbae;background:#edf4e8;padding:15px 16px;position:relative;color:#8ba175}
+.content-box{background:#e4edf9;border:1px solid #b8cdea;padding:9px 0;font:9px Consolas,monospace;color:#7b9ec7;white-space:nowrap}
+.box-top{position:absolute;top:3px;left:50%;transform:translateX(-50%)}
+.box-bottom{position:absolute;bottom:3px;left:50%;transform:translateX(-50%)}
+.box-left{position:absolute;left:5px;top:50%;transform:translateY(-50%)}
+.box-right{position:absolute;right:5px;top:50%;transform:translateY(-50%)}
+.panel-description{font-size:10px;line-height:1.6;color:#91a0b3;margin:13px 12px}
+.insert-grid{padding:0 10px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.component-tile{height:69px;background:#fff;border:1px solid #dae3ef;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border-radius:4px;font-size:9px;color:#8296b1;transition:background .12s,border-color .12s}
+.component-tile .icon{height:23px;width:23px;stroke-width:1.3}
+.component-tile:hover{background:#edf4fd;border-color:#abc4e6;color:#3a72b6}
+.insert-group-heading{font-size:8px;letter-spacing:1px;color:#93a3b9;margin:16px 12px 9px;text-transform:uppercase;font-weight:700}
+.layers-tree{padding:8px 5px}
+.layer-row{height:25px;display:flex;align-items:center;gap:5px;width:100%;font:10px Consolas,monospace;color:#8097b5;white-space:nowrap;border-radius:2px;cursor:pointer}
+.layer-row:hover{background:#eaf1fa}
+.layer-row.active{background:#dce9fa;color:#376eb0}
+.layer-tag{font-size:9px;color:#416fa6;min-width:22px}
+.layer-text{overflow:hidden;text-overflow:ellipsis;font-size:9px;color:#9eacc0;flex:1}
+.layer-row .icon{height:11px;width:11px;color:#adbacc;flex:none}
+.statusbar{height:24px;flex:none;background:linear-gradient(#f2f5f9,#e2e8f0);display:flex;align-items:center;padding:0 7px;border-top:1px solid #f9fbff;color:#8293aa;font-size:9px;gap:12px}
+.status-message{display:flex;align-items:center;gap:5px;color:#748977;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-message .icon{width:12px;height:12px}
+.status-cell{border-left:1px solid #c5d0df;box-shadow:-1px 0 #fff;padding-left:11px;white-space:nowrap}
+.resize-grip{color:#a0b0c5;font-size:15px;padding-left:3px}
+.source-panel{display:none;flex-direction:column;min-height:100px;background:#fff;flex:none;height:45%;border-bottom:1px solid #bccbe0}
+.source-heading{height:28px;border-bottom:1px solid #e0e6ef;display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:#9aabc0;background:#f6f8fc;flex:none;font-size:9px}
+.source-heading>span{display:flex;gap:6px;align-items:center}
+.source-heading .icon{width:13px;height:13px}
+.source-heading>div{display:flex;gap:15px;align-items:center}
+.source-heading button{color:#618bbd;padding:3px 5px;border:1px solid #d6e1f0;border-radius:2px}
+.source-editor{display:flex;flex:1;min-height:0;overflow:hidden}
+.line-numbers{width:45px;flex:none;text-align:right;padding:13px 10px 13px 0;color:#b0bdce;font:11px/21px Consolas,'SFMono-Regular',monospace;background:#fafbfd;border-right:1px solid #edf0f5;overflow:hidden;white-space:pre;user-select:none}
+.source-text{position:relative;flex:1;min-width:0;overflow:hidden}
+.syntax-highlight,#source-input{font:12px/21px Consolas,'SFMono-Regular','Liberation Mono',monospace;margin:0;border:0;padding:13px 14px;white-space:pre;tab-size:2;letter-spacing:0;word-break:normal;overflow:auto;position:absolute;inset:0;width:100%;height:100%;border-radius:0;resize:none;outline:none}
+.syntax-highlight{color:#46618b;pointer-events:none;z-index:0;scrollbar-width:none}
+.syntax-highlight::-webkit-scrollbar{display:none}
+#source-input{color:transparent;background:transparent;caret-color:#2d578b;z-index:1;-webkit-text-fill-color:transparent}
+#source-input::selection{background:#b4d0f766}
+.syntax-tag{color:#3f6ba6}
+.syntax-attr{color:#9268a3}
+.syntax-string{color:#618e6b}
+.syntax-comment{color:#acb5c4;font-style:italic}
+.syntax-keyword{color:#a476a3}
+.source-status{display:flex;justify-content:space-between;height:20px;background:#f8fafc;border-top:1px solid #e6ebf3;padding:4px 10px;color:#a4b1c3;font:8px Tahoma;flex:none}
+.split-handle{height:5px;background:linear-gradient(#d6e1ef,#b6c6db);cursor:row-resize;display:none;flex:none;position:relative}
+.split-handle:after{content:'••••••';position:absolute;left:50%;font-size:7px;letter-spacing:2px;color:#9aaec7;line-height:4px}
+.editor-workspace[data-mode=split] .source-panel{display:flex}
+.editor-workspace[data-mode=split] .split-handle{display:block}
+.editor-workspace[data-mode=code] .source-panel{display:flex;flex:1;height:auto}
+.editor-workspace[data-mode=code] .design-stage{display:none}
+.editor-workspace[data-mode=preview] .sheet{box-shadow:0 2px 12px #2439511a}
+.find-bar{padding:6px 8px;display:flex;align-items:center;gap:5px;background:#f0f5fc;border-bottom:1px solid #dce6f4;flex:none}
+.find-bar[hidden]{display:none}
+.find-bar input{width:140px;min-width:40px;height:24px;border-color:#cbdbee;font-size:10px}
+.find-bar button{padding:4px 7px;border:1px solid #c5d7ef;border-radius:3px;background:#fff;color:#5985bb;font-size:9px}
+.find-bar #find-count{font-size:8px;color:#8d9eb6;white-space:nowrap}
+.site-view{position:absolute;inset:0;background:#f5f8fc;overflow:auto;z-index:7;padding:30px}
+.site-view[hidden]{display:none}
+.site-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}
+.site-heading h1{font-family:'Segoe UI',Tahoma,sans-serif;font-size:24px;letter-spacing:-.7px;font-weight:600;margin:0 0 7px;color:#3f5d83}
+.site-heading p{font-size:11px;color:#90a1b7;margin:0;line-height:1.6}
+.secondary-button,.primary-button{border:1px solid #bfd0e6;border-radius:4px;background:linear-gradient(#fff,#edf3fb);font-size:10px;padding:8px 12px;display:inline-flex;gap:6px;align-items:center;color:#6085b3;white-space:nowrap}
+.primary-button{background:linear-gradient(#4e86c9,#3672b9);color:#fff;border-color:#2f68aa}
+.secondary-button:hover{background:#e2edfc}
+.primary-button:hover{background:#3e76b9}
+.secondary-button .icon,.primary-button .icon{width:14px;height:14px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:25px}
+.stat-card{border:1px solid #d9e3f0;border-radius:6px;background:#fff;padding:17px}
+.stat-card strong{font-size:27px;color:#5380b6;font-family:'Segoe UI',Tahoma,sans-serif;font-weight:500;display:block;margin-bottom:5px}
+.stat-card span{font-size:10px;color:#9aaac0}
+.data-table{width:100%;border-collapse:collapse;font-size:10px;background:#fff;border:1px solid #dbe4f0}
+.data-table th{background:#eaf0f8;text-align:left;color:#8399b6;font-size:9px;font-weight:700;padding:11px 12px;border-bottom:1px solid #d1dded}
+.data-table td{padding:11px 12px;border-bottom:1px solid #e6edf6;color:#7d95b4;vertical-align:middle}
+.data-table tr:hover td{background:#f6f9fe}
+.data-table .file-cell{display:flex;align-items:center;gap:7px;color:#517bad;cursor:pointer}
+.data-table .file-cell .icon{width:15px;height:15px}
+.data-table td .row-button{color:#9caec5;margin:0 4px}
+.data-table td .row-button:hover{color:#3f73b3}
+.data-table td .row-button .icon{width:13px;height:13px}
+.table-note{font-size:10px;color:#9cabc0;margin-top:14px;line-height:1.7}
+.issue-badge{display:inline-flex;gap:5px;align-items:center;border-radius:3px;padding:3px 6px;background:#fbf3de;color:#b5a06d;font-size:9px}
+.issue-badge.error{background:#fbe9e7;color:#c88882}
+.issue-badge.success{background:#eaf3ec;color:#86a991}
+.issue-badge .icon{width:11px;height:11px}
+.report-section-title{font-size:13px;color:#6485ae;margin:25px 0 12px;font-weight:600}
+.empty-state{padding:35px;text-align:center;background:white;border:1px dashed #cedbec;border-radius:5px;color:#91a6c1;font-size:11px;line-height:1.8}
+.empty-state>.icon{height:35px;width:35px;display:block;margin:0 auto 10px;color:#83a98e}
+.sitemap{padding:24px;min-height:340px;background:#fff;border:1px solid #dde7f3;border-radius:6px;text-align:center}
+.sitemap-root{margin:0 auto 35px;position:relative}
+.sitemap-root:after{content:'';position:absolute;left:50%;bottom:-36px;height:35px;border-left:1px solid #bacde6}
+.sitemap-children{display:flex;justify-content:center;gap:18px;padding-top:35px;position:relative;flex-wrap:wrap;border-top:1px solid #bacde6}
+.sitemap-node{width:150px;padding:18px 10px;border:1px solid #ccdbef;border-radius:5px;background:linear-gradient(#fff,#f1f6fd);display:inline-flex;flex-direction:column;gap:10px;align-items:center;color:#718fb5;font-size:10px;position:relative}
+.sitemap-children .sitemap-node:before{content:'';position:absolute;top:-36px;height:35px;border-left:1px solid #bacde6}
+.sitemap-node:hover{background:#eaf2ff;border-color:#abc5e7}
+.sitemap-node>.icon{height:28px;width:28px;color:#7fa4d1}
+.sitemap-node small{font-size:8px;color:#a6b7cc}
+.link-groups{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.link-group{background:#fff;border:1px solid #dce6f3;border-radius:5px;overflow:hidden}
+.link-group h3{margin:0;padding:12px 14px;color:#7093c0;background:#f1f6fd;border-bottom:1px solid #e0e9f6;font-size:11px}
+.link-group a,.link-group button{display:flex;align-items:center;gap:7px;padding:8px 14px;font-size:10px;color:#90a8c6;text-decoration:none;width:100%;text-align:left}
+.link-group button:hover{background:#edf4ff}
+.link-group .icon{width:12px;height:12px}
+.link-group .broken{color:#c68f88}
+.task-input{display:flex;gap:8px;margin-bottom:20px}
+.task-input input{flex:1;height:33px;font-size:11px;border-color:#ccdbee}
+.task-list{background:#fff;border:1px solid #dce6f3;border-radius:5px;overflow:hidden}
+.task-item{display:flex;align-items:center;gap:11px;padding:16px;border-bottom:1px solid #edf1f7;color:#829dbe;font-size:11px}
+.task-item:last-child{border-bottom:0}
+.task-item.done>span{text-decoration:line-through;color:#b0bdcf}
+.task-item>button{margin-left:auto;color:#b8c4d4}
+.task-item>button .icon{width:13px;height:13px}
+.website-card{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;background:#fff;border:1px solid #dce6f3;border-radius:6px;padding:24px}
+.website-card h2{font-size:18px;color:#557ead;font-weight:500;margin:0 0 12px}
+.website-card p{color:#95a9c2;font-size:11px;line-height:1.8}
+.website-card img{width:100%;border:1px solid #e0e6ea;align-self:center}
+.website-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.dropdown-menu{position:fixed;z-index:100;min-width:240px;background:#fafbfd;border:1px solid #8faacb;padding:4px;box-shadow:3px 4px 9px #213b6230;font-size:11px}
+.dropdown-menu[hidden]{display:none}
+.menu-item{width:100%;display:flex;align-items:center;gap:9px;min-height:29px;text-align:left;padding:5px 8px;color:#567197;border:1px solid transparent}
+.menu-item>.icon{height:15px;width:15px;color:#7a98bf}
+.menu-item .menu-key{margin-left:auto;padding-left:20px;font-size:9px;color:#9eb0c9}
+.menu-item:hover{background:#e2ecf9;border-color:#b5cde9}
+.menu-divider{height:1px;background:#dce5f1;margin:4px 6px 4px 29px}
+.toast-region{position:fixed;bottom:41px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:8px;background:#f9fcff;border:1px solid #a9c4e7;box-shadow:0 3px 16px #24497325;border-radius:5px;padding:10px 16px;color:#5b81b4;font-size:11px;animation:toast-in .15s ease;max-width:min(650px,80vw)}
+.toast.error{background:#fff9f7;border-color:#e3b9b0;color:#ba8a7e}
+.toast .icon{width:15px;height:15px}
+.modal{padding:0;border:1px solid #88a6ce;border-radius:6px;background:#f9fbff;color:#5a779e;width:470px;max-width:90vw;box-shadow:0 15px 80px #223f6744;font-family:Tahoma,sans-serif}
+.modal::backdrop{background:#2039584d;backdrop-filter:blur(2px)}
+.modal form{margin:0}
+.modal-header{height:44px;background:linear-gradient(#f0f5fc,#e3edf9);border-bottom:1px solid #cbdcf0;display:flex;align-items:center;justify-content:space-between;padding:0 17px}
+.modal-header h2{font-size:13px;font-weight:700;margin:0;color:#4b74a8}
+.modal-header button{font-size:20px;line-height:20px;color:#8ba4c5}
+.modal-body{padding:20px;max-height:72vh;overflow:auto;font-size:11px;line-height:1.7}
+.modal-body>p:first-child{margin-top:0}
+.modal-body label.field{display:flex;flex-direction:column;gap:6px;margin-bottom:15px;font-size:10px;color:#87a0c0}
+.modal-body label.field>input,.modal-body label.field>select{width:100%;height:32px;border-color:#c9d9ed;color:#6082ad;font-size:11px}
+.modal-body label.field>textarea{min-height:160px;width:100%;border-color:#c9d9ed;padding:10px;font:11px/1.6 Consolas,monospace;resize:vertical;color:#6586b1}
+.modal-body .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.modal-body .checkbox-label{display:flex;align-items:center;gap:7px;font-size:10px}
+.modal-footer{display:flex;justify-content:end;gap:8px;padding:13px 19px;background:#f0f5fc;border-top:1px solid #d3e1f3}
+.modal-footer button{padding:7px 18px;border-radius:3px;border:1px solid #b7cee9;background:linear-gradient(#fff,#edf3fc);font-size:10px;color:#6b8ebc;min-width:75px}
+.modal-footer .primary-button{background:linear-gradient(#5188cd,#3875bd);color:#fff;border-color:#2f69b0}
+.modal-note{padding:11px 12px;border:1px solid #dce7f6;background:#eff5fd;color:#8fa8ca;font-size:10px;line-height:1.7;border-radius:4px}
+.modal .keyboard-table{width:100%;border-collapse:collapse;font-size:11px}
+.keyboard-table td{padding:8px;border-bottom:1px solid #e4edf9;color:#8fa8ca}
+.keyboard-table td:first-child{color:#678cbf}
+.modal .shortcut{font:10px Consolas,monospace;background:#e9f1fd;border:1px solid #ccdef5;padding:3px 6px;border-radius:3px;color:#7799c6}
+.brand-about{display:flex;align-items:center;gap:15px;margin-bottom:20px}
+.brand-about .app-logo{width:48px;height:48px;border-radius:10px}
+.brand-about .app-logo .icon{width:34px;height:34px}
+.brand-about strong{font-size:23px;letter-spacing:-1px;color:#5c87bf}
+.brand-about small{display:block;font-size:10px;color:#9ab0cd}
+.help-step{margin:15px 0;font-size:11px;color:#8ca6c9}
+.help-step strong{display:block;color:#5e85b8;margin-bottom:3px}
+.wide-dialog{width:650px}
+.menu-open-overlay{position:fixed;inset:0;z-index:90}
+.empty-properties{text-align:center;padding:40px 20px;color:#92a7c4;font-size:11px;line-height:1.7}
+.empty-properties .icon{display:block;width:35px;height:35px;margin:0 auto 14px;color:#abc0dd}
+.workspace.hide-folders{grid-template-columns:64px 0 minmax(280px,1fr) 258px}
+.workspace.hide-folders .folder-pane{display:none}
+.workspace.hide-inspector{grid-template-columns:64px 202px minmax(280px,1fr) 0}
+.workspace.hide-inspector .task-pane{display:none}
+.workspace.hide-folders.hide-inspector{grid-template-columns:64px 0 minmax(280px,1fr) 0}
+body[data-theme=silver]{--title-top:#738093;--title-bottom:#505c6e;--pane-top:#edf0f5;--pane-bottom:#dbe0e8;--workspace:#e1e4e9}
+body[data-theme=silver] .titlebar{border-bottom-color:#424e5e}
+body[data-theme=silver] .document-tabs{background:#dce1e9}
+body[data-theme=silver] .views-rail{background:#edf0f4}
+button,input,textarea,select{-webkit-tap-highlight-color:transparent}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-track{background:#edf1f7}
+*::-webkit-scrollbar-thumb{background:#bdccdf;border:2px solid #edf1f7;border-radius:5px}
+*::-webkit-scrollbar-thumb:hover{background:#99b3d4}
+.source-editor *::-webkit-scrollbar-thumb{background:#c8d7eb}
+.source-editor *::-webkit-scrollbar-track{background:#f5f8fc}
+@keyframes toast-in{from{opacity:0;transform:translateY(7px)}
+to{opacity:1;transform:translateY(0)}
+}
+@media(min-width:1700px){.workspace{grid-template-columns:68px 226px minmax(280px,1fr) 282px}
+.property-row{grid-template-columns:60px 1fr}
+.folder-footer{padding-left:16px}
+.file-row,.folder-row{font-size:11px;height:29px}
+.task-pane .inspector-tabs>button{font-size:11px}
+}
+@media(max-width:1250px){.workspace{grid-template-columns:58px 175px minmax(280px,1fr) 224px}
+.view-button{font-size:8px}
+.format-toolbar #font-family{width:125px}
+.text-tool{display:none}
+.local-indicator{display:none}
+.property-section{padding-left:10px;padding-right:10px}
+.property-pair{gap:7px}
+.element-actions button{font-size:8px;padding:0 5px}
+.element-subtitle{max-width:140px}
+.folder-footer{padding-left:9px;padding-right:9px}
+.local-note{font-size:7px;margin-left:-9px;margin-right:-9px}
+.document-hint{display:none}
+.workspace.hide-folders{grid-template-columns:58px 0 minmax(280px,1fr) 224px}
+.workspace.hide-inspector{grid-template-columns:58px 175px minmax(280px,1fr) 0}
+.workspace.hide-folders.hide-inspector{grid-template-columns:58px 0 minmax(280px,1fr) 0}
+}
+@media(max-width:1000px){.workspace{grid-template-columns:55px 165px minmax(280px,1fr) 0}
+.task-pane{display:none}
+.format-toolbar #font-family{width:108px}
+.format-toolbar .separator{margin:0 2px}
+.format-toolbar #block-format{width:101px}
+.format-toolbar .tool{width:21px}
+.toolbar [data-cmd=justify],.toolbar [data-cmd=outdent],.toolbar [data-cmd=indent]{display:none}
+.workspace-label{display:none}
+.document-location .file-type-badge{display:none}
+.document-toolbar{padding:0 7px}
+.site-view{padding:20px}
+.workspace.hide-folders{grid-template-columns:55px 0 minmax(280px,1fr) 0}
+}
+@media(max-width:780px){.workspace{grid-template-columns:51px 0 minmax(280px,1fr) 0}
+.folder-pane{display:none}
+.publish-button{font-size:9px;padding:0 6px}
+.standard-toolbar .separator{margin:0 3px}
+.statusbar{gap:7px}
+.statusbar #status-file-count{display:none}
+.titlebar #project-title{display:none}
+.format-toolbar .tool{width:20px}
+.workspace.hide-folders,.workspace.hide-inspector,.workspace.hide-folders.hide-inspector{grid-template-columns:51px 0 minmax(280px,1fr) 0}
+.design-stage{padding-left:18px;padding-right:18px}
+.find-bar input{width:120px}
+}
+
+</style></head><body><noscript>PageForge Studio needs JavaScript to edit your website.</noscript><script>(function(){
+"use strict";
+
+// ---- core.js ----
+/** Pure document primitives. No framework or third-party runtime. */
+const APP_VERSION = '1.0.0';
+const PROJECT_VERSION = 1;
+const LIMITS = Object.freeze({files:512, fileBytes:12*1024*1024, projectBytes:48*1024*1024, history:160});
+const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const extension = path => path.split('.').pop().toLowerCase();
+const isHTML = path => /\.html?$/i.test(path);
+const mimeType = path => ({html:'text/html',htm:'text/html',css:'text/css',js:'text/javascript',mjs:'text/javascript',json:'application/json',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',ico:'image/x-icon',woff:'font/woff',woff2:'font/woff2',txt:'text/plain',md:'text/markdown'}[extension(path)]||'application/octet-stream');
+const isTextFile = path => /^(html?|css|js|mjs|json|svg|txt|md|xml|csv)$/i.test(extension(path));
+function normalizePath(path) {
+  if(typeof path!=='string'||!path.trim())throw new Error('Enter a file name.');
+  path=path.trim().replaceAll('\\','/');
+  if(path.startsWith('/')||/^[a-z][a-z\d+.-]*:/i.test(path)||/[\x00-\x1f?#]/.test(path))throw new Error('Use a relative project path without control characters, ? or #.');
+  const parts=[];
+  for(const p of path.split('/')){if(!p||p==='.')continue;if(p==='..'){if(!parts.length)throw new Error('The path escapes the project.');parts.pop();}else parts.push(p);}
+  if(!parts.length||parts.join('/').length>240)throw new Error('The file path is empty or too long.');
+  return parts.join('/');
+}
+function resolvePath(from, reference) {
+  if(!reference||/^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(reference))return null;
+  try {const clean=decodeURIComponent(reference.split(/[?#]/)[0]);return normalizePath(clean.startsWith('/')?clean.slice(1):from.slice(0,from.lastIndexOf('/')+1)+clean);}catch{return null;}
+}
+function relativePath(from,to) {
+  const a=from.split('/');a.pop();const b=to.split('/');while(a.length&&b.length&&a[0]===b[0]){a.shift();b.shift();}return '../'.repeat(a.length)+b.join('/');
+}
+function validateProject(input) {
+  if(!input||input.version!==PROJECT_VERSION||!Array.isArray(input.files))throw new Error('Not a supported PageForge project.');
+  if(input.files.length>LIMITS.files||!input.files.length)throw new Error('A project must contain 1–512 files.');
+  let size=0;const paths=new Set();
+  const files=input.files.map(f=>{
+    const path=normalizePath(f.path);if(paths.has(path))throw new Error('Duplicate path: '+path);paths.add(path);
+    if(typeof f.content!=='string')throw new Error('Invalid content: '+path);
+    const bytes=new TextEncoder().encode(f.content).byteLength;size+=bytes;
+    if(bytes>LIMITS.fileBytes||size>LIMITS.projectBytes)throw new Error('Project exceeds the import size limit.');
+    return {path,content:f.content,kind:f.kind==='data'?'data':'text',mime:mimeType(path),modified:Number(f.modified)||Date.now()};
+  });
+  return {version:PROJECT_VERSION,name:String(input.name||'Untitled website').slice(0,120),files,active:paths.has(input.active)?input.active:files.find(f=>isHTML(f.path))?.path||files[0].path,tasks:Array.isArray(input.tasks)?input.tasks.slice(0,500).map(t=>({id:String(t.id),text:String(t.text).slice(0,500),done:!!t.done})):[]};
+}
+class History {
+  constructor(content,limit=LIMITS.history){this.limit=limit;this.entries=[{content,label:'Opened',bookmark:null}];this.index=0;}
+  get current(){return this.entries[this.index];}
+  get canUndo(){return this.index>0;}
+  get canRedo(){return this.index<this.entries.length-1;}
+  push(content,label='Edit',bookmark=null){if(content===this.current.content)return false;this.entries.splice(this.index+1);this.entries.push({content,label,bookmark});this.index=this.entries.length-1;while(this.entries.length>this.limit){this.entries.shift();this.index--;}return true;}
+  undo(){return this.canUndo?this.entries[--this.index]:null;}
+  redo(){return this.canRedo?this.entries[++this.index]:null;}
+}
+class ProjectModel extends EventTarget {
+  constructor(data){super();this.load(data);}
+  load(data){this.data=validateProject(data);this.histories=new Map(this.data.files.map(f=>[f.path,new History(f.content)]));this.revision=0;this.savedRevision=0;this.emit('load');}
+  emit(kind,detail={}){this.dispatchEvent(new CustomEvent('change',{detail:{kind,...detail}}));}
+  get files(){return this.data.files;}
+  get active(){return this.get(this.data.active);}
+  get history(){return this.histories.get(this.data.active);}
+  get(path){return this.files.find(f=>f.path===path);}
+  activate(path){if(!this.get(path))return false;this.data.active=path;this.emit('activate',{path});return true;}
+  update(path,content,label='Edit',bookmark=null){const f=this.get(path);if(!f||f.content===content)return false;this.histories.get(path).push(content,label,bookmark);f.content=content;f.modified=Date.now();this.revision++;this.emit('edit',{path,label});return true;}
+  restore(direction){const entry=this.history[direction]();if(!entry)return null;this.active.content=entry.content;this.active.modified=Date.now();this.revision++;this.emit('history',{path:this.active.path});return entry;}
+  add(path,content='',kind='text'){path=normalizePath(path);if(this.get(path))throw new Error('A file with that name already exists.');if(this.files.length>=LIMITS.files)throw new Error('File limit reached.');const f={path,content,kind,mime:mimeType(path),modified:Date.now()};this.files.push(f);this.histories.set(path,new History(content));this.revision++;this.emit('add',{path});return f;}
+  rename(oldPath,newPath){newPath=normalizePath(newPath);if(oldPath===newPath)return;if(this.get(newPath))throw new Error('That path already exists.');const f=this.get(oldPath);if(!f)throw new Error('File not found.');f.path=newPath;f.mime=mimeType(newPath);this.histories.set(newPath,this.histories.get(oldPath));this.histories.delete(oldPath);if(this.data.active===oldPath)this.data.active=newPath;this.revision++;this.emit('rename',{oldPath,path:newPath});}
+  remove(path){if(this.files.length===1)throw new Error('Keep at least one file in the project.');this.data.files=this.files.filter(f=>f.path!==path);this.histories.delete(path);if(this.data.active===path)this.data.active=this.files.find(f=>isHTML(f.path))?.path||this.files[0].path;this.revision++;this.emit('remove',{path});}
+  snapshot(){return structuredClone(this.data);}
+}
+class ProjectStore {
+  constructor(){this.db=null;this.backend='memory';}
+  async open(){try{this.db=await new Promise((resolve,reject)=>{const req=indexedDB.open('pageforge-studio',1);req.onupgradeneeded=()=>req.result.createObjectStore('projects');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);req.onblocked=()=>reject(new Error('Storage is locked by another tab.'));});this.backend='IndexedDB';}catch{try{localStorage.setItem('pf-storage-test','1');localStorage.removeItem('pf-storage-test');this.backend='localStorage';}catch{this.backend='memory';}}return this;}
+  async read(){if(this.backend==='IndexedDB')return new Promise((resolve,reject)=>{const req=this.db.transaction('projects').objectStore('projects').get('current');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});if(this.backend==='localStorage'){const json=localStorage.getItem('pageforge-project');return json?JSON.parse(json):null;}return null;}
+  async write(data){if(this.backend==='IndexedDB')return new Promise((resolve,reject)=>{const tx=this.db.transaction('projects','readwrite');tx.objectStore('projects').put(data,'current');tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Save aborted'));});if(this.backend==='localStorage'){localStorage.setItem('pageforge-project',JSON.stringify(data));return;}throw new Error('Browser storage is unavailable. Export your project to keep your work.');}
+}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+function bytesFromFile(file){if(file.kind!=='data')return new TextEncoder().encode(file.content);const raw=atob(file.content.slice(file.content.indexOf(',')+1));return Uint8Array.from(raw,c=>c.charCodeAt(0));}
+function dataURI(bytes,mime){let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return 'data:'+mime+';base64,'+btoa(binary);}
+
+
+// ---- zip.js ----
+
+const crcTable=Uint32Array.from({length:256},(_,i)=>{let c=i;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c>>>0;});
+function crc32(bytes){let crc=0xffffffff;for(const b of bytes)crc=crcTable[(crc^b)&255]^(crc>>>8);return (crc^0xffffffff)>>>0;}
+/** ZIP32, UTF-8 names, stored entries. Standards-compatible; no external library. */
+function createZip(entries){const encoder=new TextEncoder();const chunks=[],central=[];let offset=0,centralSize=0;const now=new Date();const time=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1),date=((Math.max(1980,now.getFullYear())-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+  for(const entry of entries){const name=encoder.encode(normalizePath(entry.path)),bytes=entry.bytes instanceof Uint8Array?entry.bytes:encoder.encode(entry.content||'');const crc=crc32(bytes);const local=new Uint8Array(30+name.length);const d=new DataView(local.buffer);d.setUint32(0,0x04034b50,true);d.setUint16(4,20,true);d.setUint16(6,0x800,true);d.setUint16(10,time,true);d.setUint16(12,date,true);d.setUint32(14,crc,true);d.setUint32(18,bytes.length,true);d.setUint32(22,bytes.length,true);d.setUint16(26,name.length,true);local.set(name,30);chunks.push(local,bytes);
+    const c=new Uint8Array(46+name.length),v=new DataView(c.buffer);v.setUint32(0,0x02014b50,true);v.setUint16(4,20,true);v.setUint16(6,20,true);v.setUint16(8,0x800,true);v.setUint16(12,time,true);v.setUint16(14,date,true);v.setUint32(16,crc,true);v.setUint32(20,bytes.length,true);v.setUint32(24,bytes.length,true);v.setUint16(28,name.length,true);v.setUint32(42,offset,true);c.set(name,46);central.push(c);centralSize+=c.length;offset+=local.length+bytes.length;
+  }
+  const end=new Uint8Array(22),v=new DataView(end.buffer);v.setUint32(0,0x06054b50,true);v.setUint16(8,entries.length,true);v.setUint16(10,entries.length,true);v.setUint32(12,centralSize,true);v.setUint32(16,offset,true);return new Blob([...chunks,...central,end],{type:'application/zip'});
+}
+async function readZip(buffer){const bytes=new Uint8Array(buffer),v=new DataView(buffer);if(bytes.length>LIMITS.projectBytes)throw new Error('Archive exceeds 48 MB.');let end=-1;for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--)if(v.getUint32(i,true)===0x06054b50){end=i;break;}if(end<0)throw new Error('Not a valid ZIP archive.');if(v.getUint16(end+4,true)||v.getUint16(end+6,true))throw new Error('Multi-volume ZIP is not supported.');const count=v.getUint16(end+10,true);if(count>LIMITS.files)throw new Error('Too many files in ZIP.');let cursor=v.getUint32(end+16,true),total=0;const files=[],seen=new Set();
+  for(let i=0;i<count;i++){if(cursor+46>bytes.length||v.getUint32(cursor,true)!==0x02014b50)throw new Error('Invalid ZIP directory.');const flags=v.getUint16(cursor+8,true),method=v.getUint16(cursor+10,true),crc=v.getUint32(cursor+16,true),packed=v.getUint32(cursor+20,true),size=v.getUint32(cursor+24,true),n=v.getUint16(cursor+28,true),x=v.getUint16(cursor+30,true),c=v.getUint16(cursor+32,true),off=v.getUint32(cursor+42,true);if(cursor+46+n+x+c>bytes.length)throw new Error('Truncated ZIP directory.');const name=new TextDecoder().decode(bytes.subarray(cursor+46,cursor+46+n));cursor+=46+n+x+c;if(name.endsWith('/'))continue;const path=normalizePath(name);if(seen.has(path))throw new Error('Duplicate ZIP entry: '+path);seen.add(path);total+=size;if(size>LIMITS.fileBytes||total>LIMITS.projectBytes)throw new Error('ZIP expansion exceeds safe limits.');if(flags&1)throw new Error('Encrypted ZIP is not supported.');if(off+30>bytes.length||v.getUint32(off,true)!==0x04034b50)throw new Error('Invalid ZIP local header.');const start=off+30+v.getUint16(off+26,true)+v.getUint16(off+28,true);if(start+packed>bytes.length)throw new Error('Truncated ZIP entry.');let data=bytes.slice(start,start+packed);if(method===8){if(typeof DecompressionStream==='undefined')throw new Error('This browser cannot decompress ZIP. Import individual files instead.');const reader=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();const chunks=[];let length=0;while(true){const {value,done}=await reader.read();if(done)break;length+=value.length;if(length>size||length>LIMITS.fileBytes){await reader.cancel();throw new Error('ZIP expansion limit exceeded.');}chunks.push(value);}data=new Uint8Array(length);let p=0;for(const chunk of chunks){data.set(chunk,p);p+=chunk.length;}}else if(method!==0)throw new Error('Unsupported ZIP compression method: '+method);if(data.length!==size||crc32(data)!==crc)throw new Error('ZIP integrity check failed: '+path);files.push({path,bytes:data});}
+  return files;
+}
+
+
+// ---- renderer.js ----
+/** Instanced rectangle compositor. All layout and hit testing stay in the native DOM. */
+class OverlayRenderer {
+  constructor(canvas,onState=()=>{}){this.canvas=canvas;this.onState=onState;this.mode='initializing';this.instances=new Float32Array(8192*8);this.capacity=8192;this.count=0;this.disposed=false;this.width=1;this.height=1;this.lastSubmissionMs=0;}
+  async init(){try{
+    if(!navigator.gpu)throw new Error('WebGPU is unavailable');
+    const adapter=await navigator.gpu.requestAdapter({powerPreference:'low-power'});if(!adapter)throw new Error('No WebGPU adapter');
+    this.device=await adapter.requestDevice();if(this.disposed){this.device.destroy();return;}
+    this.device.addEventListener('uncapturederror',e=>{console.warn('PageForge WebGPU:',e.error.message);this.fallback(e.error.message);});
+    this.device.lost.then(info=>{if(!this.disposed)this.fallback('Device lost: '+info.reason);});
+    this.context=this.canvas.getContext('webgpu');if(!this.context)throw new Error('WebGPU canvas context is unavailable');
+    const format=navigator.gpu.getPreferredCanvasFormat();this.context.configure({device:this.device,format,alphaMode:'premultiplied'});
+    const shader=this.device.createShaderModule({label:'PageForge instanced rectangles',code:`
+struct Viewport { size: vec2f, padding: vec2f };
+@group(0) @binding(0) var<uniform> viewport: Viewport;
+struct VertexOutput { @builtin(position) position: vec4f, @location(0) color: vec4f };
+@vertex fn vertexMain(@builtin(vertex_index) vertex: u32, @location(0) rect: vec4f, @location(1) color: vec4f) -> VertexOutput {
+  let corners = array<vec2f,6>(vec2f(0,0),vec2f(1,0),vec2f(0,1),vec2f(0,1),vec2f(1,0),vec2f(1,1));
+  let p = rect.xy + corners[vertex] * rect.zw;
+  var output: VertexOutput;
+  output.position = vec4f(p.x / viewport.size.x * 2.0 - 1.0, 1.0 - p.y / viewport.size.y * 2.0, 0, 1);
+  output.color = vec4f(color.rgb * color.a, color.a);
+  return output;
+}
+@fragment fn fragmentMain(input: VertexOutput) -> @location(0) vec4f { return input.color; }
+`});
+    const info=await shader.getCompilationInfo();const errors=info.messages.filter(m=>m.type==='error');if(errors.length)throw new Error(errors.map(e=>e.message).join('\n'));
+    this.pipeline=await this.device.createRenderPipelineAsync({label:'Editor overlay pipeline',layout:'auto',vertex:{module:shader,entryPoint:'vertexMain',buffers:[{arrayStride:32,stepMode:'instance',attributes:[{shaderLocation:0,offset:0,format:'float32x4'},{shaderLocation:1,offset:16,format:'float32x4'}]}]},fragment:{module:shader,entryPoint:'fragmentMain',targets:[{format,blend:{color:{srcFactor:'one',dstFactor:'one-minus-src-alpha'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha'}}}]},primitive:{topology:'triangle-list'}});
+    this.buffer=this.device.createBuffer({label:'Overlay instances',size:this.instances.byteLength,usage:GPUBufferUsage.VERTEX|GPUBufferUsage.COPY_DST});
+    this.uniform=this.device.createBuffer({size:16,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});
+    this.bindGroup=this.device.createBindGroup({layout:this.pipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:this.uniform}}]});
+    this.mode='WebGPU';this.onState(this.mode,adapter.info?.description||'Instanced WGSL renderer');this.draw();
+  }catch(error){this.fallback(error.message);}}
+  fallback(reason){if(this.disposed||this.mode==='Canvas 2D')return;try{this.context?.unconfigure?.();}catch{}const old=this.canvas;this.canvas=old.cloneNode(false);old.replaceWith(this.canvas);this.ctx=this.canvas.getContext('2d');this.mode='Canvas 2D';this.onState(this.mode,reason);this.draw();}
+  resize(width,height){this.width=Math.max(1,width);this.height=Math.max(1,height);const dpr=Math.min(window.devicePixelRatio||1,3);const w=Math.max(1,Math.round(width*dpr)),h=Math.max(1,Math.round(height*dpr));if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;}this.dpr=dpr;}
+  begin(){this.count=0;}
+  rect(x,y,w,h,color){if(![x,y,w,h].every(Number.isFinite)||w<=0||h<=0||this.count>=this.capacity)return;const i=this.count++*8;this.instances.set([x,y,w,h,...color],i);}
+  border(r,color=[.16,.38,.9,1],thickness=1){this.rect(r.x,r.y,r.width,thickness,color);this.rect(r.x,r.y+r.height-thickness,r.width,thickness,color);this.rect(r.x,r.y,thickness,r.height,color);this.rect(r.x+r.width-thickness,r.y,thickness,r.height,color);}
+  draw(){if(this.disposed)return;const start=performance.now();if(this.mode==='WebGPU'){try{this.device.queue.writeBuffer(this.uniform,0,new Float32Array([this.width,this.height,0,0]));if(this.count)this.device.queue.writeBuffer(this.buffer,0,this.instances,0,this.count*8);const encoder=this.device.createCommandEncoder();const pass=encoder.beginRenderPass({colorAttachments:[{view:this.context.getCurrentTexture().createView(),clearValue:{r:0,g:0,b:0,a:0},loadOp:'clear',storeOp:'store'}]});if(this.count){pass.setPipeline(this.pipeline);pass.setBindGroup(0,this.bindGroup);pass.setVertexBuffer(0,this.buffer);pass.draw(6,this.count);}pass.end();this.device.queue.submit([encoder.finish()]);}catch(e){this.fallback(e.message);}}else if(this.mode==='Canvas 2D'&&this.ctx){const ctx=this.ctx;ctx.setTransform(this.dpr||1,0,0,this.dpr||1,0,0);ctx.clearRect(0,0,this.width,this.height);for(let j=0;j<this.count;j++){const i=j*8,a=this.instances;ctx.fillStyle=`rgba(${a[i+4]*255},${a[i+5]*255},${a[i+6]*255},${a[i+7]})`;ctx.fillRect(a[i],a[i+1],a[i+2],a[i+3]);}}this.lastSubmissionMs=performance.now()-start;}
+  dispose(){this.disposed=true;this.buffer?.destroy();this.uniform?.destroy();this.device?.destroy();}
+}
+
+
+// ---- templates.js ----
+
+const SITE_CSS = `:root{--ink:#163438;--accent:#e9ed9a;--paper:#f8f8f2;--muted:#617371;--line:#dce2d9}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit}header{height:84px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font-size:21px;font-weight:800;letter-spacing:-1px;text-decoration:none;display:flex;align-items:center;gap:9px}.brand-mark{width:22px;height:23px;display:inline-block;border-left:7px solid var(--ink);border-right:7px solid var(--ink);border-top:7px solid var(--ink);transform:skewY(-15deg)}nav{display:flex;gap:28px;align-items:center}nav a{font-size:12px;text-decoration:none}nav a:last-child{border-bottom:1px solid;padding:6px 0}.hero{padding:53px 6% 42px;display:grid;grid-template-columns:1.25fr 1fr;gap:32px;align-items:end}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px;margin:0 0 23px}.dot{width:6px;height:6px;border-radius:50%;background:#5b8175;display:inline-block}h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(40px,5.5vw,68px);line-height:1.05;letter-spacing:-2.4px;margin:0}h1 em{font-weight:400;color:#7a8b72}h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:38px;letter-spacing:-1px}p{font-size:14px;line-height:1.8}.hero-description{max-width:270px;justify-self:end;padding-bottom:3px}.hero-description p{color:var(--muted);margin:0 0 24px}.button{display:inline-flex;align-items:center;justify-content:center;gap:30px;border:1px solid var(--ink);background:var(--ink);color:white;text-decoration:none;padding:13px 19px;font-size:11px;font-weight:600;cursor:pointer}.button.light{background:var(--accent);color:var(--ink);border-color:var(--accent)}.project-image{margin:0 3%;position:relative;overflow:hidden;background:#dfe7e4}.project-image img{width:100%;display:block;aspect-ratio:1.93;object-fit:cover}.image-tag{position:absolute;bottom:22px;left:27px;background:#f8f8f2e8;padding:12px 16px;font-size:10px;letter-spacing:.2px}.image-index{position:absolute;bottom:23px;right:24px;color:#fff;font-size:11px}.intro-strip{padding:30px 6%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.intro-strip p{margin:0;font-size:11px;color:var(--muted)}.intro-strip strong{font-size:12px;font-weight:600}.section{padding:58px 6%}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:26px}.section-head h2{margin:0}.section-head a{font-size:12px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{border-top:1px solid #b7c4b5;padding-top:20px}.card .number{font-family:Georgia,serif;font-size:27px;color:#839583}.card h3{font-size:17px;letter-spacing:-.5px;margin:20px 0 6px}.card p{font-size:12px;color:var(--muted)}.callout{background:var(--ink);color:#fff;padding:48px 6%;display:flex;align-items:center;justify-content:space-between;gap:24px}.callout h2{max-width:500px;margin:0;font-size:34px}footer{padding:26px 6%;display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.page-intro{padding:65px 6% 35px;max-width:850px}.page-intro p{color:var(--muted);max-width:650px}.contact-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:60px;padding:20px 6% 70px}form{display:grid;gap:20px}label{font-size:12px;display:grid;gap:8px}input,textarea,select{border:1px solid #ccd4ca;background:#fff;padding:12px;font:inherit;border-radius:0}textarea{min-height:110px;resize:vertical}table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:14px;border:1px solid #ccd4ca;text-align:left}th{background:#edf0e8}blockquote{border-left:3px solid var(--ink);padding:10px 24px;font-family:Georgia,serif;font-size:25px;line-height:1.5}img{max-width:100%}@media(max-width:680px){header{height:68px;padding:0 6%}.brand{font-size:18px}nav{gap:14px}nav a{font-size:10px}nav a:nth-child(2){display:none}.hero{grid-template-columns:1fr;padding-top:38px;gap:20px}.hero-description{justify-self:start;max-width:360px}h1{font-size:49px}.project-image{margin:0}.project-image img{aspect-ratio:1.3}.intro-strip{gap:20px}.cards,.contact-grid{grid-template-columns:1fr}.callout{align-items:start;flex-direction:column}.section{padding:38px 6%}.section-head h2{font-size:30px}footer{gap:20px}.image-tag{left:16px;bottom:16px}}
+`;
+const PAVILION_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="780" viewBox="0 0 1500 780"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#a8c8cd"/><stop offset="1" stop-color="#e8e9d9"/></linearGradient><linearGradient id="wall" x2=".8" y2="1"><stop stop-color="#f9f6e9"/><stop offset="1" stop-color="#d6d4c3"/></linearGradient><linearGradient id="glass" x2="1" y2="1"><stop stop-color="#304946"/><stop offset=".48" stop-color="#7e9385"/><stop offset="1" stop-color="#273a31"/></linearGradient><linearGradient id="ground" x2="0" y2="1"><stop stop-color="#b5b19b"/><stop offset="1" stop-color="#ddd6ba"/></linearGradient><linearGradient id="pool" x2="0" y2="1"><stop stop-color="#73b0b0"/><stop offset="1" stop-color="#a6ceca"/></linearGradient><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".075"/></feComponentTransfer><feBlend in="SourceGraphic" mode="multiply"/></filter><filter id="soft"><feGaussianBlur stdDeviation="12"/></filter></defs><rect width="1500" height="780" fill="url(#sky)"/><path d="M0 415 Q240 325 440 392T900 345T1500 359V620H0" fill="#9baf9b"/><path d="M0 478Q230 411 390 450T850 421T1500 458V660H0" fill="#697e65"/><rect y="525" width="1500" height="255" fill="url(#ground)"/><path d="M308 546L875 445 1380 664 597 780 160 640Z" fill="#56614e" opacity=".2" filter="url(#soft)"/><path d="M102 627L701 517 1186 675 560 780H210Z" fill="#e5e0c9"/><path d="M88 666L684 563 1035 695 469 780H88Z" fill="url(#pool)"/><path d="M103 674L680 575 995 694" fill="none" stroke="#d1e5d9" stroke-width="3"/><path d="M163 716L683 623M319 750L782 665M233 680L482 773M434 641L703 750M632 602L894 719" fill="none" stroke="#d9ebe0" stroke-opacity=".22" stroke-width="2"/><path d="M309 287L805 195 1243 347 752 453Z" fill="#f0efdf"/><path d="M308 287L752 436V592L308 449Z" fill="#dad8c9"/><path d="M752 436L1243 331V484L752 592Z" fill="url(#wall)"/><path d="M295 278L804 182 1262 335 752 446Z" fill="#fcf9ed"/><path d="M295 278L752 432V462L295 308Z" fill="#c2c4b5"/><path d="M752 432L1262 322V349L752 462Z" fill="#eeecdd"/><path d="M365 334L707 448V558L365 449Z" fill="url(#glass)"/><path d="M780 467L1198 376V473L780 567Z" fill="url(#glass)"/><path d="M794 471L816 466V555L794 561ZM910 442L923 440V533L910 536ZM1016 420L1029 417V509L1016 514ZM1111 398L1124 395V489L1111 492Z" fill="#c5c6b6"/><path d="M416 352L428 355V469L416 465ZM512 383L525 388V500L512 497ZM609 416L622 420V533L609 529Z" fill="#aeafa0"/><path d="M486 382L691 451V537L486 471Z" fill="#bec4aa" opacity=".25"/><path d="M938 455L1109 417V484L938 522Z" fill="#d8ceb0" opacity=".24"/><path d="M326 317L360 329V480L326 468Z" fill="#e6e3d3"/><path d="M705 445L751 460V604L705 588Z" fill="#e6e3d3"/><path d="M752 460L781 454V597L752 604Z" fill="#f2eedd"/><path d="M1200 362L1238 354V503L1200 512Z" fill="#ede8d6"/><path d="M288 476L752 620 1262 501 1262 518 752 640 288 494Z" fill="#f3efda"/><path d="M288 476L752 620 1262 501 1246 493 752 606 310 468Z" fill="#f8f4e3"/><path d="M748 641L877 610 931 628 800 659Z" fill="#bbb8a2"/><path d="M778 660L931 624 957 639 805 676Z" fill="#eae4cc"/><path d="M627 389L643 394V474L627 468Z" fill="#d3b595"/><path d="M834 232L1007 290V340L833 281Z" fill="#dddaca"/><path d="M834 232L917 214 1086 273 1007 290Z" fill="#fffbee"/><path d="M1007 290L1086 273V323L1007 340Z" fill="#f0ecdc"/><path d="M88 450Q102 318 155 222M126 356L62 287M139 312L208 252" stroke="#5a6650" stroke-width="13" fill="none"/><g fill="#718167"><ellipse cx="76" cy="259" rx="90" ry="89"/><ellipse cx="149" cy="214" rx="90" ry="117"/><ellipse cx="212" cy="267" rx="91" ry="77"/><ellipse cx="111" cy="321" rx="80" ry="57"/></g><g fill="#889473" opacity=".68"><ellipse cx="79" cy="241" rx="61" ry="75"/><ellipse cx="163" cy="178" rx="68" ry="62"/><ellipse cx="225" cy="244" rx="52" ry="53"/></g><path d="M1366 544L1356 298M1359 417L1312 356M1358 381L1412 331" stroke="#69715b" stroke-width="9"/><g fill="#788765"><ellipse cx="1347" cy="277" rx="74" ry="85"/><ellipse cx="1417" cy="303" rx="63" ry="66"/><ellipse cx="1299" cy="326" rx="60" ry="68"/><ellipse cx="1364" cy="359" rx="70" ry="65"/></g><g stroke="#82906c" stroke-width="3" fill="none"><path d="M1275 612q-25-63-11-83m11 83q-6-73 27-96m-27 96q12-58 37-57m-37 57q-41-45-54-44"/><path d="M1370 676q-25-63-11-83m11 83q-6-73 27-96m-27 96q12-58 37-57m-37 57q-41-45-54-44"/></g><path d="M0 718Q87 673 200 780H0ZM1250 780Q1350 690 1500 728V780Z" fill="#a0a385"/><rect width="1500" height="780" fill="transparent" filter="url(#grain)"/></svg>`;
+const siteHeader=`<header><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>monograph<span style="font-weight:400;font-size:11px;margin-left:3px">®</span></a><nav aria-label="Main navigation"><a href="projects.html">Our work</a><a href="about.html">The studio</a><a href="contact.html">Let’s talk ↗</a></nav></header>`;
+const siteFooter=`<footer><span>© <span data-year>2026</span> Monograph Studio. Thoughtfully made.</span><span>Architecture & interiors · Copenhagen</span></footer>`;
+const htmlDocument=(title,body)=>`<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <meta name="description" content="Monograph is an independent architecture and interiors studio creating thoughtful spaces for everyday life.">\n  <title>${title}</title>\n  <link rel="stylesheet" href="styles/site.css">\n</head>\n<body>\n${body}\n<script src="scripts/site.js" defer><\/script>\n</body>\n</html>`;
+const HOME_HTML=htmlDocument('Monograph — Spaces for the way we live',`${siteHeader}
+<main>
+  <section class="hero">
+    <div><p class="eyebrow"><span class="dot"></span> Independent architecture studio</p><h1>Spaces for the<br>way we <em>live.</em></h1></div>
+    <div class="hero-description"><p>Thoughtful architecture. Lasting connections.<br>We create spaces that bring people<br>closer to what matters.</p><a class="button" href="projects.html">Explore our work <span>↗</span></a></div>
+  </section>
+  <figure class="project-image"><img src="assets/pavilion.svg" alt="Architectural illustration of a modern stone pavilion beside a reflecting pool"><figcaption class="image-tag">01 / THE COURTYARD HOUSE — COPENHAGEN, 2026</figcaption><span class="image-index">RESIDENTIAL / 240 M²</span></figure>
+  <div class="intro-strip"><strong>Considered design. Everyday beauty.</strong><p>Small studio. Big possibilities. Since 2014.</p></div>
+  <section class="section"><div class="section-head"><h2>A little less. A little better.</h2><a href="about.html">Meet the studio ↗</a></div><div class="cards"><article class="card"><span class="number">01</span><h3>Rooted in place</h3><p>Every project begins with listening. To the landscape, the neighborhood, and the people who will call it home.</p></article><article class="card"><span class="number">02</span><h3>Built to belong</h3><p>Honest materials and enduring details. Buildings that feel right from day one and get better with time.</p></article><article class="card"><span class="number">03</span><h3>Made together</h3><p>Good architecture is a conversation. We work closely with you, from the first sketch to the final detail.</p></article></div></section>
+  <section class="callout"><h2>Something in mind?<br>Let’s make room for it.</h2><a class="button light" href="contact.html">Start a conversation ↗</a></section>
+</main>
+${siteFooter}`);
+const componentLibrary = [
+  {id:'heading',name:'Heading',icon:'heading',group:'Text',html:'<h2>Your next great idea</h2>'},
+  {id:'paragraph',name:'Paragraph',icon:'paragraph',group:'Text',html:'<p>Every great website starts with a story. Click here and make this one yours.</p>'},
+  {id:'image',name:'Image',icon:'image',group:'Media',html:'<figure style="margin:24px 0"><img src="assets/pavilion.svg" alt="Describe this image" style="width:100%;display:block"><figcaption style="font-size:12px;padding:10px 0">Your image caption</figcaption></figure>'},
+  {id:'button',name:'Button',icon:'button',group:'Elements',html:'<p><a class="button" href="contact.html">Get in touch ↗</a></p>'},
+  {id:'columns',name:'Two columns',icon:'columns',group:'Layout',html:'<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;padding:32px 6%"><div><h2>First column</h2><p>Add your content here.</p></div><div><h2>Second column</h2><p>Make something wonderful.</p></div></section>'},
+  {id:'section',name:'Section',icon:'section',group:'Layout',html:'<section style="padding:48px 6%"><h2>A new section</h2><p>Build something worth sharing.</p></section>'},
+  {id:'list',name:'List',icon:'list',group:'Text',html:'<ul><li>Thoughtful design</li><li>Meaningful details</li><li>Lasting impressions</li></ul>'},
+  {id:'quote',name:'Quote',icon:'quote',group:'Text',html:'<blockquote>Great things are done by a series of small things brought together.</blockquote>'},
+  {id:'table',name:'Table',icon:'table',group:'Elements',html:'<table><thead><tr><th>Service</th><th>Details</th><th>Timeline</th></tr></thead><tbody><tr><td>Discovery</td><td>Research and strategy</td><td>2 weeks</td></tr><tr><td>Design</td><td>Concept to completion</td><td>6 weeks</td></tr></tbody></table>'},
+  {id:'form',name:'Contact form',icon:'form',group:'Elements',html:'<form style="max-width:520px;padding:32px" data-contact><label>Name<input name="name" required autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Message<textarea name="message" required></textarea></label><button class="button" type="submit">Send message ↗</button><p role="status" data-form-status></p></form>'},
+  {id:'divider',name:'Divider',icon:'divider',group:'Layout',html:'<hr style="border:0;border-top:1px solid #ccd4ca;margin:32px 0">'},
+  {id:'spacer',name:'Spacer',icon:'spacer',group:'Layout',html:'<div style="height:48px" aria-hidden="true"></div>'},
+  {id:'cards',name:'Cards',icon:'cards',group:'Layout',html:'<section class="section"><div class="cards"><article class="card"><h3>First idea</h3><p>Something worth exploring.</p></article><article class="card"><h3>Second idea</h3><p>Designed with intention.</p></article><article class="card"><h3>Third idea</h3><p>Make an impact.</p></article></div></section>'}
+];
+function starterProject(){return {version:PROJECT_VERSION,name:'Monograph Studio',active:'index.html',tasks:[{id:'task1',text:'Make the homepage your own',done:false},{id:'task2',text:'Review the mobile layout',done:false},{id:'task3',text:'Export and publish your website',done:false}],files:[
+  {path:'index.html',content:HOME_HTML},
+  {path:'about.html',content:htmlDocument('The studio — Monograph',`${siteHeader}<main><section class="page-intro"><p class="eyebrow">The people behind the places</p><h1>Good spaces.<br>Better <em>together.</em></h1><p>We are a small team of architects, designers, and curious minds. Since 2014, we have been exploring how thoughtful design can make everyday life a little better.</p></section><figure class="project-image"><img src="assets/pavilion.svg" alt="The Monograph studio’s courtyard house concept"></figure><section class="section"><h2>Less noise. More meaning.</h2><p>Our work brings together simple forms, natural materials, and a belief that good architecture should be for everyone. We design residential, cultural, and commercial spaces with care.</p></section></main>${siteFooter}`)},
+  {path:'projects.html',content:htmlDocument('Selected work — Monograph',`${siteHeader}<main><section class="page-intro"><p class="eyebrow">Selected work / 2024–2026</p><h1>Places with<br>a <em>purpose.</em></h1><p>Every place has a story. Here are a few of ours.</p></section><figure class="project-image"><img src="assets/pavilion.svg" alt="Courtyard house project illustration"><figcaption class="image-tag">THE COURTYARD HOUSE — COPENHAGEN</figcaption></figure><section class="section"><h2>The Courtyard House</h2><p>A quiet home arranged around a garden. Natural light, warm materials, and spaces that flow from inside to out.</p><table><thead><tr><th>Project</th><th>Location</th><th>Year</th></tr></thead><tbody><tr><td>The Courtyard House</td><td>Copenhagen</td><td>2026</td></tr><tr><td>Garden Studio</td><td>Aarhus</td><td>2025</td></tr><tr><td>The Reading Room</td><td>Odense</td><td>2024</td></tr></tbody></table></section></main>${siteFooter}`)},
+  {path:'contact.html',content:htmlDocument('Let’s talk — Monograph',`${siteHeader}<main><section class="page-intro"><p class="eyebrow">Start a conversation</p><h1>Room for<br>your <em>ideas.</em></h1><p>Tell us what you have in mind. We would love to hear from you.</p></section><div class="contact-grid"><div><h3>Find the studio</h3><p>Copenhagen, Denmark<br><a href="mailto:hello@example.com">hello@example.com</a></p><p>Monday–Friday<br>09:00–17:00 CET</p></div>${componentLibrary.find(c=>c.id==='form').html}</div></main>${siteFooter}`)},
+  {path:'styles/site.css',content:SITE_CSS},
+  {path:'scripts/site.js',content:`// Static-site enhancement. Connect a real form endpoint before deployment.\ndocument.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());\ndocument.querySelectorAll('[data-contact]').forEach(form => {\n  form.addEventListener('submit', event => {\n    event.preventDefault();\n    form.querySelector('[data-form-status]').textContent = 'Thanks! This is a demonstration form. Connect your preferred form service to receive submissions.';\n  });\n});\n`},
+  {path:'assets/pavilion.svg',content:PAVILION_SVG}
+].map(f=>({...f,kind:'text',modified:Date.now()}))};}
+const blankPage = title => `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${title.replace(/[<>&"]/g,'')}</title>\n<style>body{max-width:960px;margin:60px auto;padding:0 24px;font:16px/1.7 system-ui,sans-serif;color:#243142}h1{font-size:48px;line-height:1.1}img{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:12px}</style>\n</head>\n<body><h1>${title.replace(/[<>&"]/g,'')}</h1><p>Start writing your next great website.</p></body>\n</html>`;
+
+
+// ---- editor.js ----
+
+/** Resolves a virtual website without a server, leaving authored references recoverable. */
+class DocumentRuntime {
+  constructor(model){this.model=model;this.cache=new Map();}
+  asset(path){const file=this.model.get(path);if(!file)return null;const key=path+'\0'+file.content;const cached=this.cache.get(key);if(cached)return cached;const uri=file.kind==='data'?file.content:dataURI(new TextEncoder().encode(file.content),mimeType(path));if(this.cache.size>128)this.cache.clear();this.cache.set(key,uri);return uri;}
+  css(text,path,visited=new Set()){
+    if(visited.has(path))return '';visited=new Set(visited);visited.add(path);
+    text=text.replace(/@import\s+(?:url\(\s*)?["']([^"']+)["']\s*\)?\s*([^;]*);/gi,(match,url,media)=>{const p=resolvePath(path,url),f=p&&this.model.get(p);if(!f)return match;const result=this.css(f.content,p,visited);return media.trim()?`@media ${media}{${result}}`:result;});
+    return text.replace(/url\(\s*(["']?)([^)'"\s]+)\1\s*\)/gi,(match,quote,url)=>{const target=resolvePath(path,url),uri=target&&this.asset(target);return uri?`url("${uri}")`:match;});
+  }
+  prepare(path,{design=true,channel=''}={}){
+    const file=this.model.get(path);const doc=new DOMParser().parseFromString(file?.content||'','text/html');
+    for(const node of [...doc.querySelectorAll('base,meta[http-equiv]')]){if(node.tagName==='META'&&!/^(refresh|content-security-policy)$/i.test(node.httpEquiv))continue;const placeholder=doc.createElement('template');placeholder.dataset.pfPreserve='';placeholder.content.append(node.cloneNode(true));node.replaceWith(placeholder);}
+    for(const link of [...doc.querySelectorAll('link[rel="stylesheet"][href]')]){const target=resolvePath(path,link.getAttribute('href'));const css=target&&this.model.get(target);if(css){const style=doc.createElement('style');style.dataset.pfRuntime='';style.textContent=this.css(css.content,target);if(link.media)style.media=link.media;link.after(style);link.dataset.pfHref=link.getAttribute('href');link.removeAttribute('href');}}
+    for(const style of doc.querySelectorAll('style:not([data-pf-runtime])')){const original=style.textContent;const resolved=this.css(original,path);if(original!==resolved){style.dataset.pfCss=original;style.textContent=resolved;}}
+    for(const element of doc.querySelectorAll('[src],[poster],[srcset]')){
+      if(element.tagName==='SCRIPT')continue;
+      for(const attr of ['src','poster'])if(element.hasAttribute(attr)){const original=element.getAttribute(attr),target=resolvePath(path,original),uri=target&&this.asset(target);if(uri){element.setAttribute('data-pf-'+attr,original);element.setAttribute(attr,uri);}}
+      if(element.hasAttribute('srcset')){const original=element.getAttribute('srcset');element.dataset.pfSrcset=original;element.setAttribute('srcset',original.split(',').map(entry=>{const [url,...descriptor]=entry.trim().split(/\s+/),target=resolvePath(path,url);return [(target&&this.asset(target))||url,...descriptor].join(' ');}).join(', '));}
+    }
+    for(const script of [...doc.querySelectorAll('script')]){
+      if(design){const placeholder=doc.createElement('template');placeholder.dataset.pfPreserve='';placeholder.content.append(script.cloneNode(true));script.replaceWith(placeholder);}
+      else if(script.hasAttribute('src')){const target=resolvePath(path,script.getAttribute('src')),js=target&&this.model.get(target);if(js){script.removeAttribute('src');script.textContent=js.content;}}
+    }
+    const policy=doc.createElement('meta');policy.httpEquiv='Content-Security-Policy';policy.dataset.pfRuntime='';policy.content=`default-src 'none'; script-src ${design?"'none'":"'unsafe-inline' data: blob:"}; style-src 'unsafe-inline' data: blob: https:; img-src data: blob: https:; font-src data: blob: https:; media-src data: blob: https:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'`;doc.head.prepend(policy);
+    if(design){
+      const style=doc.createElement('style');style.dataset.pfRuntime='';style.textContent='html{scroll-behavior:auto!important}body{min-height:calc(100vh - 2px);caret-color:#2868d8!important}*:focus{outline:none}a,button,input,textarea,select{cursor:text}::selection{background:#a9c9ff;color:inherit}table:empty,section:empty,div:empty,p:empty{min-height:24px}';doc.head.append(style);
+    }else{
+      for(const anchor of doc.querySelectorAll('a[href]')){const raw=anchor.getAttribute('href'),target=resolvePath(path,raw);if(target&&this.model.get(target)&&isHTML(target)){anchor.dataset.pfRoute=target;if(raw.includes('#'))anchor.dataset.pfHash=raw.slice(raw.indexOf('#'));}}
+      const bridge=doc.createElement('script');bridge.dataset.pfRuntime='';bridge.textContent=`document.addEventListener('click',e=>{const a=e.target.closest('a[data-pf-route]');if(a){e.preventDefault();parent.postMessage({type:'pageforge:navigate',channel:${JSON.stringify(channel)},path:a.dataset.pfRoute,hash:a.dataset.pfHash||''},'*');}});window.addEventListener('error',e=>parent.postMessage({type:'pageforge:preview-error',channel:${JSON.stringify(channel)},message:e.message},'*'));`;doc.body.append(bridge);
+    }
+    return '<!DOCTYPE html>\n'+doc.documentElement.outerHTML;
+  }
+}
+class VisualEditor extends EventTarget {
+  constructor(frame,model,runtime){super();this.frame=frame;this.model=model;this.runtime=runtime;this.doc=null;this.selected=null;this.range=null;this.timer=0;this.path=null;this.composing=false;this.generation=0;this.originalBodyEditable=null;this.originalBodySpellcheck=null;}
+  emit(type,detail={}){this.dispatchEvent(new CustomEvent(type,{detail}));}
+  async load(path,bookmark=null){this.flush();this.pendingLoadResolve?.();this.path=path;this.selected=null;this.range=null;this.doc=null;this.observer?.disconnect();const generation=++this.generation;return new Promise(resolve=>{this.pendingLoadResolve=resolve;this.frame.onload=()=>{if(generation!==this.generation){resolve();return;}this.doc=this.frame.contentDocument;if(!this.doc?.body){resolve();return;}this.originalBodyEditable=this.doc.body.getAttribute('contenteditable');this.originalBodySpellcheck=this.doc.body.getAttribute('spellcheck');this.doc.body.contentEditable='true';this.doc.body.spellcheck=true;this.bind();this.select(this.doc.querySelector('h1')||this.doc.body);if(bookmark)this.restoreBookmark(bookmark);this.emit('load');this.pendingLoadResolve=null;resolve();};this.frame.srcdoc=this.runtime.prepare(path,{design:true});});}
+  bind(){const d=this.doc;
+    d.addEventListener('click',e=>{const anchor=e.target.closest('a');if(anchor){e.preventDefault();if(e.ctrlKey||e.metaKey){const path=resolvePath(this.path,anchor.getAttribute('href'));if(path&&this.model.get(path))this.emit('navigate',{path});return;}}if(e.target.closest('button,input,textarea,select'))e.preventDefault();this.select(e.target.closest('img,td,th,button,input,textarea,select')||e.target);});
+    d.addEventListener('dblclick',e=>{if(e.target.tagName==='IMG')this.emit('image',{element:e.target});});
+    d.addEventListener('submit',e=>e.preventDefault());
+    d.addEventListener('input',()=>{if(!this.composing)this.schedule();this.invalidate();});
+    d.addEventListener('compositionstart',()=>{this.composing=true;});d.addEventListener('compositionend',()=>{this.composing=false;this.schedule();});
+    d.addEventListener('beforeinput',e=>{if(e.inputType==='historyUndo'||e.inputType==='historyRedo'){e.preventDefault();this.emit('shortcut',{command:e.inputType==='historyUndo'?'undo':'redo'});}});
+    d.addEventListener('selectionchange',()=>{const s=d.getSelection();if(s?.rangeCount&&d.body.contains(s.anchorNode)){this.range=s.getRangeAt(0).cloneRange();const el=s.anchorNode.nodeType===1?s.anchorNode:s.anchorNode.parentElement;if(el&&el!==d.body&&el!==this.selected&&!s.isCollapsed)this.select(el,false);this.emit('selection',{element:this.selected});}});
+    d.addEventListener('keydown',e=>{const mod=e.ctrlKey||e.metaKey;let command=null;if(mod){command=({s:'save',z:e.shiftKey?'redo':'undo',y:'redo',b:'bold',i:'italic',u:'underline',k:'link',f:'find'})[e.key.toLowerCase()];}if(command){e.preventDefault();this.emit('shortcut',{command});}if(e.key==='Escape'){this.select(this.selected?.parentElement||d.body);e.preventDefault();}if(e.key==='Tab'&&this.selected?.closest('table')){const cells=[...this.selected.closest('table').querySelectorAll('td,th')],current=this.selected.closest('td,th'),next=cells[cells.indexOf(current)+(e.shiftKey?-1:1)];if(next){e.preventDefault();this.select(next);const r=d.createRange();r.selectNodeContents(next);r.collapse(true);this.setRange(r);}}});
+    d.addEventListener('paste',e=>{e.preventDefault();const html=e.clipboardData.getData('text/html'),text=e.clipboardData.getData('text/plain');if(html)this.insertHTML(this.sanitize(html),'Paste',true);else this.insertText(text);});
+    d.addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('application/x-pageforge-component')||e.dataTransfer.types.includes('application/x-pageforge-node'))e.preventDefault();});
+    d.addEventListener('drop',e=>{const component=e.dataTransfer.getData('application/x-pageforge-component'),node=e.dataTransfer.getData('application/x-pageforge-node');if(component||node){e.preventDefault();this.select(e.target);if(component)this.emit('dropcomponent',{id:component});if(node)this.emit('dropnode',{path:JSON.parse(node),target:e.target});}});
+    this.observer?.disconnect();this.observer=new MutationObserver(()=>this.invalidate());this.observer.observe(d.body,{subtree:true,childList:true,attributes:true,characterData:true});
+    d.addEventListener('scroll',()=>this.invalidate(),true);d.addEventListener('load',()=>this.invalidate(),true);
+    this.frame.contentWindow.addEventListener('resize',()=>this.invalidate());
+  }
+  select(element,saveRange=true){if(!element||!this.doc?.body.contains(element))element=this.doc?.body;if(!element)return;if(element.nodeType!==1)element=element.parentElement;this.selected=element;if(saveRange){const s=this.doc.getSelection();if(s?.rangeCount&&this.doc.body.contains(s.anchorNode))this.range=s.getRangeAt(0).cloneRange();}this.emit('selection',{element});this.invalidate();}
+  invalidate(){this.emit('paint');}
+  schedule(){clearTimeout(this.timer);this.timer=setTimeout(()=>this.commit('Typing'),300);}
+  flush(){if(this.timer){clearTimeout(this.timer);this.timer=0;this.commit('Typing');}}
+  serialize(){if(!this.doc)return this.model.get(this.path)?.content||'';const root=this.doc.documentElement.cloneNode(true);for(const node of root.querySelectorAll('[data-pf-runtime]'))node.remove();for(const template of root.querySelectorAll('template[data-pf-preserve]'))template.replaceWith(template.content.cloneNode(true));for(const element of root.querySelectorAll('*')){
+      for(const attr of ['src','poster','href','srcset'])if(element.hasAttribute('data-pf-'+attr)){element.setAttribute(attr,element.getAttribute('data-pf-'+attr));element.removeAttribute('data-pf-'+attr);}
+      if(element.hasAttribute('data-pf-css')){element.textContent=element.getAttribute('data-pf-css');element.removeAttribute('data-pf-css');}
+    }
+    const body=root.querySelector('body');if(this.originalBodyEditable===null)body.removeAttribute('contenteditable');else body.setAttribute('contenteditable',this.originalBodyEditable);if(this.originalBodySpellcheck===null)body.removeAttribute('spellcheck');else body.setAttribute('spellcheck',this.originalBodySpellcheck);
+    return '<!DOCTYPE html>\n'+root.outerHTML;
+  }
+  commit(label){clearTimeout(this.timer);this.timer=0;if(!this.doc||!this.path||this.composing)return;const content=this.serialize();this.model.update(this.path,content,label,this.bookmark());this.emit('commit',{label});}
+  transaction(label,action){if(!this.doc)return;this.flush();action();this.commit(label);this.emit('selection',{element:this.selected});this.invalidate();}
+  nodePath(node){const path=[];while(node&&node!==this.doc.body){const p=node.parentNode;if(!p)return null;path.unshift([...p.childNodes].indexOf(node));node=p;}return node?path:null;}
+  fromPath(path){let node=this.doc?.body;for(const index of path||[]){node=node?.childNodes[index];if(!node)return null;}return node;}
+  bookmark(){const s=this.doc?.getSelection();if(!s?.rangeCount)return null;const r=s.getRangeAt(0),start=this.nodePath(r.startContainer),end=this.nodePath(r.endContainer);return start&&end?{start,end,startOffset:r.startOffset,endOffset:r.endOffset}:null;}
+  restoreBookmark(b){try{const a=this.fromPath(b.start),z=this.fromPath(b.end);if(!a||!z)return;const r=this.doc.createRange();r.setStart(a,Math.min(b.startOffset,a.nodeType===3?a.length:a.childNodes.length));r.setEnd(z,Math.min(b.endOffset,z.nodeType===3?z.length:z.childNodes.length));this.setRange(r);}catch{}}
+  setRange(range){this.doc.body.focus({preventScroll:true});const selection=this.doc.getSelection();selection.removeAllRanges();selection.addRange(range);this.range=range.cloneRange();}
+  restoreRange(){if(this.range&&this.doc.body.contains(this.range.commonAncestorContainer)){this.setRange(this.range);return this.range;}return null;}
+  block(){return this.selected?.closest('p,h1,h2,h3,h4,h5,h6,li,blockquote,td,th,div,section,article,header,footer')||this.selected||this.doc.body;}
+  format(command,value){if(!this.doc)return;this.transaction('Format '+command,()=>{
+    let target=this.selected||this.doc.body;const range=this.restoreRange();
+    const tags={bold:'strong',italic:'em',underline:'u',strike:'s'};
+    if(tags[command]){
+      const tag=tags[command];const ancestor=target.closest(tag);
+      if(ancestor&&(!range||range.collapsed||range.toString()===ancestor.textContent)){const parent=ancestor.parentElement;ancestor.replaceWith(...ancestor.childNodes);this.select(parent);}
+      else if(range&&!range.collapsed){const wrapper=this.doc.createElement(tag);wrapper.append(range.extractContents());range.insertNode(wrapper);range.selectNodeContents(wrapper);this.setRange(range);this.select(wrapper,false);}
+      else {const prop={bold:'fontWeight',italic:'fontStyle',underline:'textDecoration',strike:'textDecoration'}[command];const active={bold:'700',italic:'italic',underline:'underline',strike:'line-through'}[command];const computed=this.frame.contentWindow.getComputedStyle(target);target.style[prop]=(computed[prop]===active||(command==='bold'&&Number(computed.fontWeight)>=600))?({bold:'400',italic:'normal',underline:'none',strike:'none'}[command]):active;}
+    }else if(command==='block'){
+      const block=this.block();if(block===this.doc.body)return;const replacement=this.doc.createElement(value);for(const attr of block.attributes)replacement.setAttribute(attr.name,attr.value);replacement.append(...block.childNodes);block.replaceWith(replacement);this.select(replacement);
+    }else if(command==='ul'||command==='ol'){
+      const block=this.block(),existing=block.closest('ul,ol');if(existing){const fragment=this.doc.createDocumentFragment();for(const li of [...existing.children]){const p=this.doc.createElement('p');p.append(...li.childNodes);fragment.append(p);}const first=fragment.firstChild;existing.replaceWith(fragment);this.select(first);}else if(block!==this.doc.body){const list=this.doc.createElement(command),li=this.doc.createElement('li');li.append(...block.childNodes);list.append(li);block.replaceWith(list);this.select(li);}
+    }else if(command==='indent'||command==='outdent'){target=this.block();const current=parseFloat(this.frame.contentWindow.getComputedStyle(target).marginInlineStart)||0;target.style.marginInlineStart=Math.max(0,current+(command==='indent'?24:-24))+'px';}
+    else if(command==='clear'){if(range&&!range.collapsed){const text=this.doc.createTextNode(range.toString());range.deleteContents();range.insertNode(text);range.selectNodeContents(text);this.setRange(range);}else{target.removeAttribute('style');for(const el of [...target.querySelectorAll('strong,b,em,i,u,s,span')])el.replaceWith(...el.childNodes);}}
+    else {const properties={left:'textAlign',center:'textAlign',right:'textAlign',justify:'textAlign',font:'fontFamily',size:'fontSize',color:'color',highlight:'backgroundColor'};const prop=properties[command];if(!prop)return;const val=['left','center','right','justify'].includes(command)?command:value;if(range&&!range.collapsed&&!['left','center','right','justify'].includes(command)){const span=this.doc.createElement('span');span.style[prop]=val;span.append(range.extractContents());range.insertNode(span);range.selectNodeContents(span);this.setRange(range);this.select(span,false);}else{target=['left','center','right','justify'].includes(command)?this.block():target;target.style[prop]=val;}}
+  });}
+  setProperty(name,value,isAttribute=false){const target=this.selected;if(!target)return;this.transaction('Set '+name,()=>{if(isAttribute){if(value==='')target.removeAttribute(name);else target.setAttribute(name,value);if(['src','poster'].includes(name)){target.removeAttribute('data-pf-'+name);const path=resolvePath(this.path,value),asset=path&&this.runtime.asset(path);if(asset){target.setAttribute('data-pf-'+name,value);target.setAttribute(name,asset);}}}else{if(value.trim()==='')target.style.removeProperty(name);else target.style.setProperty(name,value);}});}
+  insertHTML(html,label='Insert element',atCaret=false){this.transaction(label,()=>{const template=this.doc.createElement('template');template.innerHTML=html;const nodes=[...template.content.childNodes];let first=nodes.find(n=>n.nodeType===1);if(atCaret){const range=this.restoreRange();if(range){range.deleteContents();range.insertNode(template.content);const last=nodes[nodes.length-1];if(last){range.setStartAfter(last);range.collapse(true);this.setRange(range);}}else this.doc.body.append(template.content);}else{const block=this.block();if(block===this.doc.body)this.doc.body.append(template.content);else{const container=block.closest('section,article,header,footer,figure,table');if(first&&['SECTION','ARTICLE','HEADER','FOOTER','FIGURE','TABLE'].includes(first.tagName)&&container)container.after(template.content);else block.after(template.content);}}if(first){this.resolveInserted(first);this.select(first);first.scrollIntoView({block:'nearest'});}});}
+  resolveInserted(root){for(const el of [root,...root.querySelectorAll('[src]')])if(el.hasAttribute('src')){const raw=el.getAttribute('src'),path=resolvePath(this.path,raw),uri=path&&this.runtime.asset(path);if(uri){el.dataset.pfSrc=raw;el.setAttribute('src',uri);}}}
+  insertText(text){this.transaction('Paste text',()=>{let range=this.restoreRange();if(!range){range=this.doc.createRange();range.selectNodeContents(this.selected||this.doc.body);range.collapse(false);}range.deleteContents();const node=this.doc.createTextNode(text);range.insertNode(node);range.setStartAfter(node);range.collapse(true);this.setRange(range);});}
+  sanitize(html){const parsed=new DOMParser().parseFromString(html,'text/html');parsed.querySelectorAll('script,style,iframe,object,embed,link,meta,base,form,input,button,textarea,select').forEach(n=>n.remove());for(const el of parsed.body.querySelectorAll('*')){for(const a of [...el.attributes])if(/^on/i.test(a.name)||a.name==='srcdoc'||a.name==='contenteditable'||a.name.startsWith('data-pf-')||(['href','src'].includes(a.name)&&/^\s*(javascript|vbscript|data:text\/html):/i.test(a.value)))el.removeAttribute(a.name);}return parsed.body.innerHTML;}
+  link(href,text='',newTab=false){if(/^\s*(javascript|vbscript|data):/i.test(href))throw new Error('Use an https, mailto, tel, anchor, or project URL.');this.transaction('Insert hyperlink',()=>{let a=this.selected?.closest('a'),range=this.restoreRange();if(a){a.setAttribute('href',href);if(text)a.textContent=text;}else{a=this.doc.createElement('a');a.href=href;if(range&&!range.collapsed){a.append(range.extractContents());range.insertNode(a);}else{a.textContent=text||href;if(range){range.insertNode(a);range.setStartAfter(a);range.collapse(true);this.setRange(range);}else (this.selected||this.doc.body).append(a);}}if(newTab){a.target='_blank';a.rel='noopener noreferrer';}else{a.removeAttribute('target');a.removeAttribute('rel');}this.select(a);});}
+  duplicate(){if(!this.selected||this.selected===this.doc.body)return;this.transaction('Duplicate element',()=>{const clone=this.selected.cloneNode(true);clone.removeAttribute('id');clone.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));this.selected.after(clone);this.select(clone);});}
+  remove(){if(!this.selected||this.selected===this.doc.body)return;this.transaction('Delete element',()=>{const parent=this.selected.parentElement;this.selected.remove();this.select(parent);});}
+  move(direction){if(!this.selected||this.selected===this.doc.body)return;this.transaction('Move element',()=>{const el=this.selected,sibling=direction<0?el.previousElementSibling:el.nextElementSibling;if(sibling){if(direction<0)sibling.before(el);else sibling.after(el);el.scrollIntoView({block:'nearest'});}});}
+  moveNode(path,target){const node=this.fromPath(path);if(!node||node===this.doc.body||node===target||node.contains(target))return;this.transaction('Move element',()=>{if(target===this.doc.body)target.append(node);else target.after(node);this.select(node);});}
+  table(action){const table=this.selected?.closest('table');if(!table)throw new Error('Select a table cell first.');this.transaction('Table '+action,()=>{const cell=this.selected.closest('td,th'),row=cell?.parentElement||table.rows[0];if(!row)return;const col=cell?.cellIndex||0;if(action==='row'){const newRow=row.cloneNode(true);for(const c of newRow.cells){c.textContent='Cell';c.removeAttribute('id');}row.after(newRow);this.select(newRow.cells[0]);}else if(action==='column'){for(const r of table.rows){const c=this.doc.createElement(r.cells[0]?.tagName||'td');c.textContent='Cell';r.cells[Math.min(col,r.cells.length-1)]?.after(c);}}else if(action==='delete-row'){if(table.rows.length===1){table.remove();this.select(this.doc.body);}else{const next=row.nextElementSibling||row.previousElementSibling;row.remove();this.select(next?.cells[0]||table);}}else if(action==='delete-column'){for(const r of [...table.rows])r.cells[col]?.remove();if([...table.rows].every(r=>!r.cells.length)){table.remove();this.select(this.doc.body);}else this.select(table.querySelector('td,th')||table);}});}
+  dispose(){this.flush();this.observer?.disconnect();this.generation++;}
+}
+
+
+// ---- ui.js ----
+
+const iconPaths = {
+  page:'M5 3h9l5 5v13H5z M14 3v5h5 M8 12h8 M8 16h8',
+  folder:'M3 6h7l2 2h9v12H3z M3 10h18',
+  folderOpen:'M3 8V5h7l2 3h8v3 M3 11h19l-3 9H3z',
+  save:'M4 3h14l3 3v15H3V3z M7 3v6h10V3 M7 21v-8h10v8 M14 5v2',
+  export:'M12 3v12 M7 8l5-5 5 5 M4 14v7h16v-7',
+  import:'M12 3v12 M7 10l5 5 5-5 M4 15v6h16v-6',
+  undo:'M9 5L4 10l5 5 M4 10h10a6 6 0 0 1 0 12',
+  redo:'M15 5l5 5-5 5 M20 10H10a6 6 0 0 0 0 12',
+  cut:'M7 8l11 13 M7 16L18 3 M7 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M7 17a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+  copy:'M8 7h13v14H8z M4 17H2V2h13v2',
+  paste:'M8 5H4v16h16V5h-4 M8 3h8v5H8z M8 12h8 M8 16h8',
+  bold:'M7 4h6a4 4 0 0 1 0 8H7 M7 12h7a4 4 0 0 1 0 8H7V4',
+  italic:'M10 4h9 M5 20h9 M14 4L9 20',
+  underline:'M6 3v9a6 6 0 0 0 12 0V3 M4 22h16',
+  left:'M3 5h18 M3 10h12 M3 15h18 M3 20h12',
+  center:'M3 5h18 M6 10h12 M3 15h18 M6 20h12',
+  right:'M3 5h18 M9 10h12 M3 15h18 M9 20h12',
+  justify:'M3 5h18 M3 10h18 M3 15h18 M3 20h18',
+  list:'M9 5h12 M9 12h12 M9 19h12 M3 5h1 M3 12h1 M3 19h1',
+  ordered:'M9 5h12 M9 12h12 M9 19h12 M2 3h2v5 M2 8h4 M2 14q4-4 4 0l-4 5h4',
+  indent:'M11 5h10 M11 12h10 M11 19h10 M2 7l5 5-5 5',
+  outdent:'M11 5h10 M11 12h10 M11 19h10 M7 7l-5 5 5 5',
+  link:'M10 14l4-4 M8 15l-2 2a4 4 0 0 1-5-5l5-5a4 4 0 0 1 6 0 M16 9l2-2a4 4 0 0 1 5 5l-5 5a4 4 0 0 1-6 0',
+  image:'M3 3h18v18H3z M3 17l6-6 4 4 3-3 5 6 M15 7h.01',
+  table:'M3 3h18v18H3z M3 9h18 M3 15h18 M9 3v18 M15 3v18',
+  preview:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  globe:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M3 12h18 M12 3c-5 5-5 13 0 18 5-5 5-13 0-18',
+  search:'M16 10a6 6 0 1 1-12 0 6 6 0 0 1 12 0z M15 15l6 6',
+  code:'M8 6l-6 6 6 6 M16 6l6 6-6 6 M14 3l-4 18',
+  css:'M4 3h16l-2 17-6 2-6-2z M8 8h9l-1 4H9l1 4 3 1 3-1',
+  js:'M4 3h16v18H4z M9 8v8q0 3-3 1 M17 9q-5-3-5 1c0 3 5 1 5 4s-5 3-5 1',
+  design:'M4 4h16v16H4z M4 9h16 M10 9v11',
+  split:'M3 3h18v18H3z M3 12h18 M7 6l-2 2 2 2 M17 6l2 2-2 2',
+  reports:'M4 3h16v18H4z M8 17v-5 M12 17V7 M16 17v-8',
+  navigation:'M9 3h6v5H9z M2 16h6v5H2z M16 16h6v5h-6z M12 8v4 M5 16v-4h14v4',
+  tasks:'M5 3h15v18H5z M3 7l2 2 4-4 M10 8h7 M8 13h9 M8 17h9',
+  desktop:'M2 3h20v14H2z M12 17v4 M7 21h10',
+  tablet:'M5 2h14v20H5z M11 19h2',
+  phone:'M7 2h10v20H7z M10 5h4 M11 19h2',
+  plus:'M12 4v16 M4 12h16',
+  close:'M6 6l12 12 M6 18L18 6',
+  chevron:'M9 5l7 7-7 7',
+  down:'M5 9l7 7 7-7',
+  up:'M5 15l7-7 7 7',
+  trash:'M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7',
+  settings:'M9 3h6l1 4 4 1 2 5-3 3v4l-5 2-3-3-4 1-3-4 2-4-1-4z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  help:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M9 8a3 3 0 1 1 4 3c-1 1-1 1-1 3 M12 17h.01',
+  check:'M4 12l5 5L20 6',
+  grid:'M3 3h18v18H3z M3 9h18 M3 15h18 M9 3v18 M15 3v18',
+  layers:'M2 7l10-5 10 5-10 5z M2 12l10 5 10-5 M2 17l10 5 10-5',
+  heading:'M5 4v16 M19 4v16 M5 12h14',
+  paragraph:'M13 4v17 M18 4v17 M21 4H9a5 5 0 0 0 0 10h4',
+  button:'M3 6h18v12H3z M7 12h10 M14 9l3 3-3 3',
+  columns:'M3 4h7v16H3z M14 4h7v16h-7z',
+  section:'M3 4h18v16H3z M7 8h10 M7 12h7 M7 16h10',
+  quote:'M3 6h7v7H4c0 4 2 5 5 5 M14 6h7v7h-6c0 4 2 5 5 5',
+  form:'M3 3h18v18H3z M7 7h10 M7 11h10 M7 16h5',
+  divider:'M2 12h20 M6 8v8 M18 8v8',
+  spacer:'M3 3h18 M3 21h18 M12 6v12 M8 9l4-3 4 3 M8 15l4 3 4-3',
+  cards:'M2 4h5v16H2z M10 4h5v16h-5z M18 4h5v16h-5z',
+  palette:'M12 3a9 9 0 0 0 0 18h2a2 2 0 0 0 1-4c-2-1-1-4 2-4h2c5-5-1-10-7-10z M7 9h.01 M11 6h.01 M16 7h.01 M6 14h.01',
+  warning:'M12 3L1 21h22z M12 9v5 M12 17h.01',
+  pin:'M8 3h8l-1 6 4 4h-6v8l-2-3v-5H5l4-4z',
+  clear:'M14 3l8 8-11 11H7l-6-6z M7 10l8 8 M11 22h11',
+  refresh:'M20 8a8 8 0 1 0 0 8 M20 3v5h-5',
+  color:'M4 18L12 3l8 15 M7 12h10 M3 22h18',
+  home:'M2 11l10-9 10 9 M5 9v13h14V9 M10 22v-8h4v8',
+  clock:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M12 7v5l3 2',
+  terminal:'M4 5l7 7-7 7 M13 19h7',
+  arrow:'M4 12h16 M14 6l6 6-6 6',
+  external:'M14 3h7v7 M21 3L10 14 M10 3H3v18h18v-7',
+  rename:'M14 3l7 7-11 11H3v-7z M11 6l7 7'
+};
+function icon(name,cls=''){return `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[name]||iconPaths.page}"/></svg>`;}
+function tool(command,name,iconName=command,extra=''){return `<button class="tool" data-cmd="${command}" title="${escapeHTML(name)}" aria-label="${escapeHTML(name)}" ${extra}>${icon(iconName)}</button>`;}
+function fileIcon(path){return /\.css$/i.test(path)?'css':/\.[cm]?js$/i.test(path)?'js':/\.(svg|png|jpe?g|gif|webp|ico)$/i.test(path)?'image':/\.html?$/i.test(path)?'page':'code';}
+function createShell(){return `
+<div class="app" id="app">
+  <header class="titlebar"><div class="app-brand"><span class="app-logo">${icon('page')}</span><strong>PageForge <span>Studio</span></strong><span class="title-divider"></span><span id="project-title">Monograph Studio</span></div><div class="title-right"><span class="engine-badge" id="engine-badge"><i></i><span>Starting renderer</span></span><button data-cmd="help" class="title-button" aria-label="Help">${icon('help')}</button></div></header>
+  <div class="menubar" role="menubar">${['File','Edit','View','Insert','Format','Table','Tools','Window','Help'].map(n=>`<button role="menuitem" aria-haspopup="true" data-menu="${n}">${n}</button>`).join('')}<span class="menu-spacer"></span><span class="workspace-label">THE WEB, YOUR WAY.</span></div>
+  <div class="toolbar standard-toolbar"><span class="grip"></span>${tool('new','New page (Ctrl+N)','page')}${tool('import','Import files or website (Ctrl+O)','folderOpen')}${tool('save','Save locally (Ctrl+S)','save')}<span class="separator"></span>${tool('cut','Cut','cut')}${tool('copy','Copy','copy')}${tool('paste','Paste','paste')}<span class="separator"></span>${tool('undo','Undo (Ctrl+Z)','undo','id="undo-tool"')}${tool('redo','Redo (Ctrl+Shift+Z)','redo','id="redo-tool"')}<span class="separator"></span>${tool('find','Find and replace (Ctrl+F)','search')}${tool('link','Insert hyperlink (Ctrl+K)','link')}${tool('image','Insert image','image')}${tool('table','Insert table','table')}<span class="separator"></span>${tool('preview','Preview website','preview')}${tool('reports','Website reports','reports')}${tool('boundaries','Show element boundaries','grid','id="boundaries-tool"')}<span class="toolbar-stretch"></span><span class="local-indicator" id="local-indicator">${icon('check')} Saved locally</span><button class="publish-button" data-cmd="publish">${icon('globe')} Publish website <span>▾</span></button></div>
+  <div class="toolbar format-toolbar" id="format-toolbar"><span class="grip"></span><select id="block-format" aria-label="Paragraph style"><option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="h4">Heading 4</option><option value="blockquote">Block quote</option><option value="pre">Preformatted</option><option value="div">Division</option></select><select id="font-family" aria-label="Font family"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Georgia, serif">Georgia</option><option value="'Times New Roman', serif">Times New Roman</option><option value="Verdana, sans-serif">Verdana</option><option value="Tahoma, sans-serif">Tahoma</option><option value="system-ui, sans-serif">System UI</option><option value="'Courier New', monospace">Courier New</option></select><select id="font-size" aria-label="Font size">${[10,11,12,14,16,18,20,24,28,32,40,48,56,64,72].map(v=>`<option value="${v}px" ${v===16?'selected':''}>${v}</option>`).join('')}</select><span class="separator"></span>${tool('bold','Bold (Ctrl+B)')}${tool('italic','Italic (Ctrl+I)')}${tool('underline','Underline (Ctrl+U)')}<span class="separator"></span>${tool('left','Align left')}${tool('center','Align center')}${tool('right','Align right')}${tool('justify','Justify')}<span class="separator"></span>${tool('ul','Bulleted list','list')}${tool('ol','Numbered list','ordered')}${tool('outdent','Decrease indent')}${tool('indent','Increase indent')}<span class="separator"></span><label class="color-tool" title="Text color">${icon('color')}<input id="text-color" type="color" value="#163438" aria-label="Text color"></label><label class="color-tool highlight-tool" title="Highlight color">${icon('palette')}<input id="highlight-color" type="color" value="#e9ed9a" aria-label="Highlight color"></label>${tool('clear','Clear formatting','clear')}<span class="toolbar-stretch"></span><button class="text-tool" data-cmd="page-properties">${icon('settings')} Page properties</button></div>
+  <main class="workspace" id="workspace">
+    <nav class="views-rail" aria-label="Website views">${[['page','Page','design'],['folders','Folders','folder'],['reports','Reports','reports'],['navigation','Navigation','navigation'],['hyperlinks','Hyperlinks','link'],['tasks','Tasks','tasks']].map(([id,label,i])=>`<button data-view="${id}" class="view-button ${id==='page'?'active':''}" title="${label} view">${icon(i)}<span>${label}</span></button>`).join('')}<div class="rail-bottom"><button data-cmd="settings" title="Preferences" aria-label="Preferences">${icon('settings')}</button></div></nav>
+    <aside class="folder-pane" id="folder-pane"><div class="pane-heading"><strong>Folder List</strong><div>${tool('new','New file','plus')}${tool('toggle-folders','Hide folder list','close')}</div></div><div class="site-root">${icon('globe')}<span id="site-root-name">Monograph Studio</span></div><div class="file-search">${icon('search')}<input type="search" id="file-filter" placeholder="Find a file…" aria-label="Find a file"></div><div id="file-tree" class="file-tree" role="tree" aria-label="Project files"></div><div class="folder-footer"><div class="mini-caption">YOUR WORKSPACE</div><button data-cmd="new">${icon('plus')} Create a new page</button><button data-cmd="import">${icon('import')} Import files</button><div class="local-note"><span class="safe-dot"></span><span>Local-first. Your files stay yours.</span></div></div></aside>
+    <section class="document-pane"><div class="document-tabs" id="document-tabs"></div>
+      <div class="document-toolbar"><div class="document-location">${icon('page')}<span id="document-location">index.html</span><span class="file-type-badge" id="file-type-badge">HTML</span></div><div class="viewport-tools"><button class="device-button active" data-device="0" aria-label="Responsive desktop" title="Responsive desktop">${icon('desktop')}</button><button class="device-button" data-device="768" aria-label="Tablet 768 pixels" title="Tablet · 768px">${icon('tablet')}</button><button class="device-button" data-device="390" aria-label="Phone 390 pixels" title="Phone · 390px">${icon('phone')}</button><span class="small-separator"></span><select id="viewport-width" aria-label="Viewport width"><option value="0">Responsive</option><option value="1440">1440 px</option><option value="1280">1280 px</option><option value="1024">1024 px</option><option value="768">768 px</option><option value="390">390 px</option></select><select id="zoom-level" aria-label="Canvas zoom">${[50,67,75,90,100,110,125,150,200].map(n=>`<option value="${n/100}" ${n===100?'selected':''}>${n}%</option>`).join('')}</select></div></div>
+      <div class="editor-workspace" id="editor-workspace" data-mode="design"><div class="source-panel" id="source-panel"><div class="source-heading"><span>${icon('code')} <span id="source-label">HTML source</span></span><div><button data-cmd="format-code">Format</button><span>UTF-8</span></div></div><div class="find-bar" id="find-bar" hidden><input id="find-input" placeholder="Find in source" aria-label="Find text"><input id="replace-input" placeholder="Replace with" aria-label="Replacement text"><button data-cmd="find-next">Next</button><button data-cmd="replace-one">Replace</button><button data-cmd="replace-all">All</button><span id="find-count"></span><button data-cmd="close-find" aria-label="Close find">×</button></div><div class="source-editor"><div class="line-numbers" id="line-numbers">1</div><div class="source-text"><pre class="syntax-highlight" id="syntax-highlight" aria-hidden="true"></pre><textarea id="source-input" wrap="off" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Source code editor"></textarea></div></div><div class="source-status"><span id="source-position">Ln 1, Col 1</span><span>Changes apply automatically</span></div></div>
+      <div class="split-handle" id="split-handle" title="Drag to resize split"></div>
+      <div class="design-stage" id="design-stage"><div class="ruler horizontal-ruler" id="ruler"></div><div class="sheet" id="sheet"><iframe id="design-frame" title="Editable website design" sandbox="allow-same-origin"></iframe><iframe id="preview-frame" title="Isolated website preview" sandbox="allow-scripts" hidden></iframe><canvas id="overlay-canvas" aria-hidden="true"></canvas><div id="selection-label" class="selection-label" hidden></div><div id="resize-handles"></div><div id="resize-shield" hidden></div></div><div class="preview-notice" id="preview-notice" hidden>${icon('preview')} Preview · scripts isolated from the editor</div></div>
+      <div class="site-view" id="site-view" hidden></div></div>
+      <div class="tag-bar"><span class="tag-caption">${icon('code')} DOM</span><div id="tag-path"></div><span id="selection-dimensions"></span></div>
+      <div class="view-tabs"><div class="mode-tabs" role="tablist" aria-label="Editor mode">${[['design','Design','design'],['split','Split','split'],['code','Code','code'],['preview','Preview','preview']].map(([id,n,i])=>`<button data-mode="${id}" role="tab" aria-selected="${id==='design'}" class="${id==='design'?'active':''}">${icon(i)} ${n}</button>`).join('')}</div><span class="document-hint" id="document-hint">Click to edit · Esc to select parent</span></div>
+    </section>
+    <aside class="task-pane" id="task-pane"><div class="pane-heading"><strong>Task Pane</strong>${tool('toggle-inspector','Hide task pane','close')}</div><div class="inspector-tabs" role="tablist">${['Properties','Insert','Layers'].map(n=>`<button data-inspector="${n.toLowerCase()}" role="tab" aria-selected="${n==='Properties'}" class="${n==='Properties'?'active':''}">${n}</button>`).join('')}</div><div class="inspector-content" id="inspector-content"></div><div class="inspector-footer"><span class="safe-dot"></span><span>Native HTML. No lock-in.</span></div></aside>
+  </main>
+  <footer class="statusbar"><span class="status-message" id="status-message">${icon('check')} Ready</span><span class="status-spacer"></span><span id="status-file-count"></span><span class="status-cell" id="renderer-status">Renderer initializing</span><span class="status-cell" id="viewport-status">Responsive</span><span class="status-cell">HTML5</span><span class="status-cell">UTF-8</span><span class="resize-grip">◢</span></footer>
+</div>
+<div id="dropdown-menu" class="dropdown-menu" role="menu" hidden></div>
+<div id="toast-region" class="toast-region" aria-live="polite"></div>
+<dialog id="modal" class="modal"></dialog>
+<input id="import-input" type="file" multiple hidden accept=".html,.htm,.css,.js,.mjs,.json,.pageforge,.zip,.svg,.png,.jpg,.jpeg,.webp,.gif,.ico,.woff,.woff2,.md,.txt,.xml,.csv">
+<input id="image-import-input" type="file" accept="image/*" hidden>
+`;}
+
+
+// ---- app.js ----
+
+
+
+
+
+
+const $ = (selector,root=document)=>root.querySelector(selector);
+const $$ = (selector,root=document)=>[...root.querySelectorAll(selector)];
+const safeJSON = value=>escapeHTML(JSON.stringify(value));
+const humanBytes=bytes=>bytes<1024?bytes+' B':bytes<1048576?(bytes/1024).toFixed(1)+' KB':(bytes/1048576).toFixed(1)+' MB';
+const cap = value=>value.charAt(0).toUpperCase()+value.slice(1);
+const attrInput=(label,name,value='',placeholder='')=>`<label class="property-row"><span>${label}</span><input data-attr="${name}" value="${escapeHTML(value)}" placeholder="${escapeHTML(placeholder)}" aria-label="${label}"></label>`;
+const cssInput=(label,name,value='',placeholder='auto')=>`<label class="property-row"><span>${label}</span><input data-css="${name}" value="${escapeHTML(value)}" placeholder="${escapeHTML(placeholder)}" aria-label="${label}"></label>`;
+const formField=(label,name,value='',type='text',extra='')=>`<label class="field">${label}<input name="${name}" type="${type}" value="${escapeHTML(value)}" ${extra}></label>`;
+const formatCommands=new Set(['bold','italic','underline','strike','left','center','right','justify','ul','ol','indent','outdent','clear']);
+class PageForgeApp {
+  constructor(){this.mode='design';this.view='page';this.inspector='properties';this.device=0;this.zoom=1;this.boundaries=false;this.grid=false;this.openTabs=['index.html','styles/site.css'];this.collapsed=new Set();this.sourceTimer=0;this.autosaveTimer=0;this.paintFrame=0;this.saveChain=Promise.resolve();this.channelId=globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2);this.autosavePaused=false;this.persistedMode='IndexedDB';this.loading=false;this.settings={autosave:true,spellcheck:true,theme:'blue'};}
+  async init(){
+    document.body.innerHTML=createShell();
+    try{this.settings={...this.settings,...JSON.parse(localStorage.getItem('pageforge-settings')||'{}')};}catch{}
+    document.body.dataset.theme=this.settings.theme;
+    this.store=await new ProjectStore().open();let data=null;try{data=await this.store.read();if(data)data=validateProject(data);}catch(e){this.toast('Saved project could not be loaded: '+e.message,true);}
+    this.model=new ProjectModel(data||starterProject());this.model.savedRevision=data?0:-1;this.runtime=new DocumentRuntime(this.model);this.editor=new VisualEditor($('#design-frame'),this.model,this.runtime);this.openTabs=[this.model.active.path];if(this.model.get('styles/site.css')&&this.model.active.path!=='styles/site.css')this.openTabs.push('styles/site.css');
+    this.renderer=new OverlayRenderer($('#overlay-canvas'),(mode,detail)=>{this.persistedMode=mode;$('#engine-badge span').textContent=mode==='WebGPU'?'WebGPU accelerated':'Canvas fallback';$('#engine-badge').title=detail;$('#renderer-status').textContent=mode==='WebGPU'?'WebGPU · on demand':'Canvas 2D · on demand';this.requestPaint();});
+    this.bind();this.bindModel();this.bindEditor();this.renderTree();this.renderTabs();this.renderHeader();this.renderInspector();this.renderer.init();
+    await this.openFile(this.model.active.path,false);this.renderSaveState();new ResizeObserver(()=>this.layout()).observe($('#design-stage'));this.layout();
+    if(typeof BroadcastChannel!=='undefined'){this.broadcast=new BroadcastChannel('pageforge-project');this.broadcast.onmessage=e=>{if(e.data?.source!==this.channelId&&e.data?.type==='saved'&&!this.autosavePaused){this.autosavePaused=true;this.toast('Another tab saved this project. Autosave is paused here to prevent overwriting it.',true);this.renderSaveState();}};}
+    if(!data)this.scheduleSave();if(this.store.backend==='memory')this.toast('Local storage is unavailable. Export your project to keep your work.',true);
+    window.pageforge=this;document.documentElement.dataset.ready='true';
+  }
+  bindModel(){this.model.addEventListener('change',event=>{const {kind,path}=event.detail;this.renderHeader();this.renderTabs();if(['add','remove','rename','load','activate'].includes(kind))this.renderTree();if(kind==='edit'||kind==='history'){if(path===this.model.active.path&&document.activeElement!==$('#source-input'))this.renderSource();}if(kind!=='load')this.scheduleSave();this.renderSaveState();if(this.view!=='page'&&kind!=='activate')this.renderSiteView();});}
+  bindEditor(){
+    this.editor.addEventListener('selection',()=>{this.renderBreadcrumbs();this.updateFormatting();if(!$('#inspector-content').contains(document.activeElement))this.renderInspector();this.requestPaint();});
+    this.editor.addEventListener('paint',()=>this.requestPaint());
+    this.editor.addEventListener('commit',()=>{this.renderSource();this.renderBreadcrumbs();if(this.inspector==='layers')this.renderInspector();});
+    this.editor.addEventListener('load',()=>{this.editor.doc.body.spellcheck=this.settings.spellcheck;this.layout();this.renderInspector();this.renderBreadcrumbs();});
+    this.editor.addEventListener('shortcut',e=>this.run(e.detail.command));
+    this.editor.addEventListener('navigate',e=>this.openFile(e.detail.path));
+    this.editor.addEventListener('image',()=>this.run('image'));
+    this.editor.addEventListener('dropcomponent',e=>this.insertComponent(e.detail.id));
+    this.editor.addEventListener('dropnode',e=>this.editor.moveNode(e.detail.path,e.detail.target));
+  }
+  bind(){
+    document.addEventListener('pointerdown',e=>{const command=e.target.closest('[data-cmd]');if(command&&!e.target.closest('dialog')&&command.closest('.toolbar,.element-actions'))e.preventDefault();if(!e.target.closest('.dropdown-menu,[data-menu]'))this.closeMenu();});
+    document.addEventListener('click',e=>{
+      const menu=e.target.closest('button[data-menu]');if(menu){this.openMenu(menu);return;}
+      const cmd=e.target.closest('[data-cmd]');if(cmd){e.preventDefault();this.closeMenu();this.run(cmd.dataset.cmd,cmd.dataset.value);return;}
+      const mode=e.target.closest('[data-mode]');if(mode?.tagName==='BUTTON'){this.setMode(mode.dataset.mode);return;}
+      const view=e.target.closest('[data-view]');if(view){this.setView(view.dataset.view);return;}
+      const device=e.target.closest('[data-device]');if(device){this.setDevice(Number(device.dataset.device));return;}
+      const inspector=e.target.closest('[data-inspector]');if(inspector){this.inspector=inspector.dataset.inspector;this.renderInspector();return;}
+      const closeTab=e.target.closest('[data-close-tab]');if(closeTab){this.closeTab(closeTab.dataset.closeTab);return;}
+      const tab=e.target.closest('[data-tab]');if(tab){tab.dataset.tab==='website'?this.setView('website'):this.openFile(tab.dataset.tab);return;}
+      const file=e.target.closest('[data-file]');if(file){this.openFile(file.dataset.file);return;}
+      const folder=e.target.closest('[data-folder]');if(folder){const p=folder.dataset.folder;this.collapsed.has(p)?this.collapsed.delete(p):this.collapsed.add(p);this.renderTree();return;}
+      const component=e.target.closest('[data-component]');if(component){this.insertComponent(component.dataset.component);return;}
+      const path=e.target.closest('[data-node-path]');if(path){const el=this.editor.fromPath(JSON.parse(path.dataset.nodePath));if(el){this.editor.select(el);el.scrollIntoView({block:'nearest'});this.requestPaint();}return;}
+      const taskDelete=e.target.closest('[data-delete-task]');if(taskDelete){this.model.data.tasks=this.model.data.tasks.filter(t=>t.id!==taskDelete.dataset.deleteTask);this.touch('Delete task');this.renderSiteView();return;}
+      const inspectIssue=e.target.closest('[data-issue-path]');if(inspectIssue)this.openFile(inspectIssue.dataset.issuePath);
+    });
+    document.addEventListener('change',e=>{
+      const t=e.target;
+      if(t.matches('[data-css]')){let value=t.value.trim();const name=t.dataset.css;if(value&&/^(width|height|padding|margin|gap|font-size|border-radius)$/.test(name)&&/^\d+(\.\d+)?$/.test(value))value+='px';if(value&&!CSS.supports(name,value)){this.toast('Not a valid CSS value for '+name,true);return;}this.editor.setProperty(name,value);}
+      else if(t.matches('[data-attr]')){const name=t.dataset.attr,value=t.value;if(['href','src','poster'].includes(name)&&/^\s*(javascript|vbscript|data:text\/html):/i.test(value)){this.toast('Unsafe URL protocol.',true);return;}this.editor.setProperty(name,value,true);}
+      else if(t.matches('[data-task-id]')){const task=this.model.data.tasks.find(task=>task.id===t.dataset.taskId);if(task){task.done=t.checked;this.touch('Update task');this.renderSiteView();}}
+    });
+    document.addEventListener('dragstart',e=>{const component=e.target.closest('[data-component]');if(component){e.dataTransfer.setData('application/x-pageforge-component',component.dataset.component);e.dataTransfer.effectAllowed='copy';}const layer=e.target.closest('.layer-row[data-node-path]');if(layer){e.dataTransfer.setData('application/x-pageforge-node',layer.dataset.nodePath);e.dataTransfer.effectAllowed='move';}});
+    $('#file-filter').addEventListener('input',()=>this.renderTree());
+    $('#block-format').addEventListener('change',e=>this.editor.format('block',e.target.value));
+    $('#font-family').addEventListener('change',e=>this.editor.format('font',e.target.value));
+    $('#font-size').addEventListener('change',e=>this.editor.format('size',e.target.value));
+    $('#text-color').addEventListener('change',e=>this.editor.format('color',e.target.value));
+    $('#highlight-color').addEventListener('change',e=>this.editor.format('highlight',e.target.value));
+    $('#viewport-width').addEventListener('change',e=>this.setDevice(Number(e.target.value)));
+    $('#zoom-level').addEventListener('change',e=>{this.zoom=Number(e.target.value);this.layout();});
+    $('#source-input').addEventListener('input',()=>{this.renderHighlight();clearTimeout(this.sourceTimer);this.sourceTimer=setTimeout(()=>this.commitSource(),350);this.sourcePosition();});
+    $('#source-input').addEventListener('scroll',()=>{const s=$('#source-input');$('#syntax-highlight').scrollTop=s.scrollTop;$('#syntax-highlight').scrollLeft=s.scrollLeft;$('#line-numbers').scrollTop=s.scrollTop;});
+    $('#source-input').addEventListener('click',()=>this.sourcePosition());$('#source-input').addEventListener('keyup',()=>this.sourcePosition());
+    $('#source-input').addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const t=e.target,start=t.selectionStart,end=t.selectionEnd;t.setRangeText('  ',start,end,'end');t.dispatchEvent(new Event('input'));}});
+    $('#find-input').addEventListener('input',()=>this.updateFindCount());$('#find-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();this.findNext();}if(e.key==='Escape')this.run('close-find');});
+    $('#import-input').addEventListener('change',e=>{this.importFiles([...e.target.files]);e.target.value='';});
+    $('#image-import-input').addEventListener('change',async e=>{const files=[...e.target.files];if(!files.length)return;try{const f=await this.importSingle(files[0],'assets/');if($('#modal').open&&$('#modal [name=src]'))$('#modal [name=src]').value=relativePath(this.model.active.path,f.path);else{await this.ensureDesign();this.editor.insertHTML(`<img src="${escapeHTML(relativePath(this.model.active.path,f.path))}" alt="${escapeHTML(files[0].name.replace(/\.[^.]+$/,''))}" style="max-width:100%;height:auto">`,'Insert image');}}catch(error){this.toast(error.message,true);}e.target.value='';});
+    document.addEventListener('keydown',e=>this.keydown(e));
+    window.addEventListener('message',e=>{if(e.source!==$('#preview-frame').contentWindow||e.data?.channel!==this.channelId)return;if(e.data.type==='pageforge:navigate'&&typeof e.data.path==='string'&&this.model.get(e.data.path)&&isHTML(e.data.path))this.openFile(e.data.path);else if(e.data.type==='pageforge:preview-error')this.toast('Preview script: '+String(e.data.message).slice(0,250),true);});
+    window.addEventListener('beforeunload',e=>{this.flush();if(this.model.revision!==this.model.savedRevision){e.preventDefault();e.returnValue='';}});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){this.flush();if(this.settings.autosave&&!this.autosavePaused)this.saveNow(false);}});
+    $('#resize-handles').addEventListener('pointerdown',e=>this.beginResize(e));
+    $('#split-handle').addEventListener('pointerdown',e=>{e.preventDefault();const handle=e.currentTarget;handle.setPointerCapture(e.pointerId);const total=$('#editor-workspace').getBoundingClientRect();const move=event=>{$('#source-panel').style.height=Math.max(100,Math.min(total.height-130,event.clientY-total.top))+'px';this.layout();};const up=()=>{handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',up);};handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',up,{once:true});});
+  }
+  keydown(e){if($('#modal').open)return;const mod=e.ctrlKey||e.metaKey;let cmd=null;if(mod)cmd=({s:'save',o:'import',n:'new',z:e.shiftKey?'redo':'undo',y:'redo',k:'link',f:'find'})[e.key.toLowerCase()];if(mod&&e.key.toLowerCase()==='d'&&!e.target.matches('input,textarea'))cmd='duplicate';if(e.key==='F1')cmd='help';if(e.key==='F5')cmd='preview';if(mod&&e.key==='Enter')cmd=this.mode==='preview'?'design':'preview';if(e.key==='Escape')this.closeMenu();if(cmd){e.preventDefault();this.run(cmd);}}
+  async run(command,value){try{
+    if(formatCommands.has(command)){await this.ensureDesign();this.editor.format(command);return;}
+    switch(command){
+      case 'new': return await this.newFile();
+      case 'import': $('#import-input').click();break;
+      case 'save': await this.saveNow(true);break;
+      case 'save-project': this.exportProject();break;
+      case 'export-file': this.exportFile();break;
+      case 'export-site': this.exportSite();break;
+      case 'publish': await this.publishDialog();break;
+      case 'undo':case 'redo': await this.history(command);break;
+      case 'design':case 'split':case 'code':case 'preview': await this.setMode(command);break;
+      case 'folders':case 'reports':case 'navigation':case 'hyperlinks':case 'tasks':case 'website':this.setView(command);break;
+      case 'link':await this.linkDialog();break;
+      case 'image':await this.imageDialog();break;
+      case 'table':await this.tableDialog();break;
+      case 'table-row':case 'table-column':case 'table-delete-row':case 'table-delete-column':await this.ensureDesign();this.editor.table(command.replace('table-',''));break;
+      case 'html':await this.htmlDialog();break;
+      case 'component':this.inspector='insert';$('#workspace').classList.remove('hide-inspector');this.renderInspector();break;
+      case 'insert-heading':case 'insert-paragraph':case 'insert-divider':case 'insert-form':await this.insertComponent(command.replace('insert-',''));break;
+      case 'duplicate':await this.ensureDesign();this.editor.duplicate();break;
+      case 'delete-element':await this.ensureDesign();this.editor.remove();break;
+      case 'move-up':this.editor.move(-1);break;
+      case 'move-down':this.editor.move(1);break;
+      case 'select-parent':this.editor.select(this.editor.selected?.parentElement);break;
+      case 'select-all':if(this.mode==='code')$('#source-input').select();else if(this.editor.doc){const r=this.editor.doc.createRange();r.selectNodeContents(this.editor.doc.body);this.editor.setRange(r);}break;
+      case 'copy':case 'cut':await this.copy(command==='cut');break;
+      case 'paste':await this.paste();break;
+      case 'rename':await this.renameFile(value||this.model.active.path);break;
+      case 'delete-file':await this.deleteFile(value||this.model.active.path);break;
+      case 'page-properties':await this.pageProperties();break;
+      case 'find':await this.showFind();break;
+      case 'find-next':this.findNext();break;
+      case 'replace-one':this.replace(false);break;
+      case 'replace-all':this.replace(true);break;
+      case 'close-find':$('#find-bar').hidden=true;break;
+      case 'format-code':this.formatCode();break;
+      case 'boundaries':this.boundaries=!this.boundaries;$('#boundaries-tool').classList.toggle('active',this.boundaries);this.requestPaint();this.toast('Element boundaries '+(this.boundaries?'shown':'hidden'));break;
+      case 'grid':this.grid=!this.grid;this.requestPaint();break;
+      case 'toggle-folders':$('#workspace').classList.toggle('hide-folders');this.layout();break;
+      case 'toggle-inspector':$('#workspace').classList.toggle('hide-inspector');this.layout();break;
+      case 'next-tab':{const index=this.openTabs.indexOf(this.model.active.path);await this.openFile(this.openTabs[(index+1)%this.openTabs.length]);break;}
+      case 'close-tab':this.closeTab(this.model.active.path);break;
+      case 'reset-layout':$('#workspace').classList.remove('hide-inspector','hide-folders');this.device=0;this.zoom=1;$('#zoom-level').value='1';this.setDevice(0);this.inspector='properties';this.renderInspector();this.setMode('design');break;
+      case 'refresh':if(this.view==='page'){if(this.mode==='preview')this.renderPreview();else await this.editor.load(this.model.active.path);}else this.renderSiteView();break;
+      case 'add-task':this.addTask();break;
+      case 'settings':await this.settingsDialog();break;
+      case 'help':await this.helpDialog();break;
+      case 'shortcuts':await this.shortcutsDialog();break;
+      case 'about':await this.aboutDialog();break;
+      case 'reset-demo':await this.resetDemo();break;
+      case 'upload-image':$('#image-import-input').click();break;
+      default:if(command?.startsWith('component:'))await this.insertComponent(command.split(':')[1]);
+    }
+  }catch(error){console.error('PageForge:',error);this.toast(error.message||'The operation could not be completed.',true);}}
+  renderHeader(){const title=this.model.data.name;$('#project-title').textContent=title;$('#site-root-name').textContent=title;document.title=title+' — PageForge Studio';$('#document-location').textContent=this.model.active.path;$('#file-type-badge').textContent=extension(this.model.active.path).toUpperCase();$('#status-file-count').textContent=this.model.files.length+' files';$('#undo-tool').disabled=!this.model.history?.canUndo;$('#redo-tool').disabled=!this.model.history?.canRedo;}
+  renderTree(){const filter=$('#file-filter').value.trim().toLowerCase();const root={folders:new Map(),files:[]};for(const file of this.model.files){if(filter&&!file.path.toLowerCase().includes(filter))continue;let node=root;const parts=file.path.split('/'),name=parts.pop();for(const p of parts){if(!node.folders.has(p))node.folders.set(p,{folders:new Map(),files:[]});node=node.folders.get(p);}node.files.push({...file,name});}
+    const render=(node,depth=0,prefix='')=>{let result='';for(const [name,child] of [...node.folders].sort(([a],[b])=>a.localeCompare(b))){const path=prefix+name,closed=this.collapsed.has(path)&&!filter;result+=`<button class="folder-row" role="treeitem" aria-expanded="${!closed}" data-folder="${escapeHTML(path)}" style="padding-left:${depth*12+4}px"><span class="expand-arrow">${closed?'▸':'▾'}</span>${icon(closed?'folder':'folderOpen')}<span>${escapeHTML(name)}</span></button>`;if(!closed)result+=render(child,depth+1,path+'/');}for(const f of node.files.sort((a,b)=>a.name.localeCompare(b.name))){result+=`<button class="file-row ${fileIcon(f.path)} ${f.path===this.model.active.path?'active':''}" role="treeitem" aria-selected="${f.path===this.model.active.path}" data-file="${escapeHTML(f.path)}" title="${escapeHTML(f.path)}" style="padding-left:${depth*12+17}px">${icon(fileIcon(f.path))}<span>${escapeHTML(f.name)}</span>${f.path==='index.html'?icon('home','home-mark'):''}</button>`;}return result;};$('#file-tree').innerHTML=render(root)||'<p class="panel-description">No matching files.</p>';}
+  renderTabs(){this.openTabs=this.openTabs.filter(p=>this.model.get(p));if(!this.openTabs.includes(this.model.active.path))this.openTabs.push(this.model.active.path);$('#document-tabs').innerHTML=`<div class="document-tab ${this.view!=='page'?'active':''}" data-tab="website" role="button" tabindex="0">${icon('globe')} Web Site</div>`+this.openTabs.map(path=>`<div class="document-tab ${path===this.model.active.path&&this.view==='page'?'active':''}" data-tab="${escapeHTML(path)}" role="button" tabindex="0">${icon(fileIcon(path))}<span>${escapeHTML(path.split('/').pop())}</span><button class="tab-close" data-close-tab="${escapeHTML(path)}" aria-label="Close ${escapeHTML(path)}">${icon('close')}</button></div>`).join('')+`<button class="tab-add" data-cmd="new" aria-label="New file">${icon('plus')}</button>`;}
+  async openFile(path,activate=true){if(!path||!this.model.get(path))return;this.flush();if(activate)this.model.activate(path);this.view='page';this.renderViewState();this.renderTree();this.renderTabs();this.renderHeader();this.renderSource(true);if(isHTML(path)){if(this.mode==='preview')this.renderPreview();else await this.editor.load(path);}else{this.mode='code';this.renderModeState();this.editor.selected=null;this.renderBreadcrumbs();this.renderInspector();}this.layout();}
+  closeTab(path){this.flush();if(this.openTabs.length<=1){this.setView('website');return;}const i=this.openTabs.indexOf(path);this.openTabs=this.openTabs.filter(p=>p!==path);if(path===this.model.active.path)this.openFile(this.openTabs[Math.max(0,i-1)]);else this.renderTabs();}
+  flush(){if(this.sourceTimer){clearTimeout(this.sourceTimer);this.sourceTimer=0;this.commitSource(false);}this.editor?.flush();}
+  async ensureDesign(){if(!isHTML(this.model.active.path))throw new Error('Open an HTML page to use the visual editor.');if(this.view!=='page'||this.mode==='code'||this.mode==='preview')await this.setMode('design');if(!this.editor.doc||this.editor.path!==this.model.active.path)await this.editor.load(this.model.active.path);}
+  async setMode(mode){if(!['design','split','code','preview'].includes(mode))return;this.flush();if(!isHTML(this.model.active.path)&&mode!=='code'){this.toast('Visual views are available for HTML pages. Open an HTML file first.',true);return;}const previous=this.mode;this.mode=mode;this.view='page';this.renderViewState();this.renderModeState();this.renderTabs();if(mode==='preview')this.renderPreview();else if(mode==='design'||mode==='split'){if(previous==='code'||previous==='preview'||this.editor.path!==this.model.active.path)await this.editor.load(this.model.active.path);}if(mode==='code'||mode==='split')this.renderSource(true);this.renderInspector();this.layout();}
+  renderModeState(){$('#editor-workspace').dataset.mode=this.mode;$$('.mode-tabs button').forEach(b=>{b.classList.toggle('active',b.dataset.mode===this.mode);b.setAttribute('aria-selected',String(b.dataset.mode===this.mode));});const preview=this.mode==='preview';$('#design-frame').hidden=preview;$('#preview-frame').hidden=!preview;$('#preview-notice').hidden=!preview;$('#format-toolbar').classList.toggle('inactive',this.mode==='code'||preview);$('#document-hint').textContent=preview?'Sandboxed preview · click links to navigate':this.mode==='code'?'Source is the document · changes save automatically':'Click to edit · Esc to select parent';if(preview||this.mode==='code'){this.renderer.begin();this.renderer.draw();$('#selection-label').hidden=true;$('#resize-handles').innerHTML='';}}
+  setView(view){this.flush();this.view=view;this.renderViewState();this.renderTabs();if(view!=='page')this.renderSiteView();else this.layout();}
+  renderViewState(){$$('.view-button').forEach(b=>b.classList.toggle('active',b.dataset.view===this.view));$('#site-view').hidden=this.view==='page';this.renderModeState();}
+  setDevice(width){this.device=width;$('#viewport-width').value=String(width);$$('[data-device]').forEach(b=>b.classList.toggle('active',Number(b.dataset.device)===width));this.layout();}
+  layout(){const stage=$('#design-stage');if(!stage||stage.clientWidth===0)return;const available=Math.max(220,stage.clientWidth-48),height=Math.max(180,stage.clientHeight-48);const width=this.device?this.device*this.zoom:available;const logicalWidth=width/this.zoom,logicalHeight=height/this.zoom;const sheet=$('#sheet');sheet.style.width=width+'px';sheet.style.height=height+'px';for(const frame of [$('#design-frame'),$('#preview-frame')]){frame.style.width=logicalWidth+'px';frame.style.height=logicalHeight+'px';frame.style.transform=`scale(${this.zoom})`;}
+    this.renderer.resize(width,height);this.updateFormatting();$('#viewport-status').textContent=Math.round(logicalWidth)+' × '+Math.round(logicalHeight);$('#ruler').innerHTML=Array.from({length:Math.ceil(available/100)+1},(_,i)=>`<span style="left:${i*100}px">${Math.round(i*100/this.zoom)}</span>`).join('');this.requestPaint();}
+  requestPaint(){if(this.paintFrame)return;this.paintFrame=requestAnimationFrame(()=>{this.paintFrame=0;this.paint();});}
+  paint(){if(!this.renderer)return;this.renderer.begin();const active=this.view==='page'&&(this.mode==='design'||this.mode==='split');const selected=this.editor.selected;if(!active||!this.editor.doc){this.renderer.draw();$('#selection-label').hidden=true;$('#resize-handles').innerHTML='';return;}
+    const w=this.renderer.width,h=this.renderer.height,z=this.zoom;
+    if(this.grid){for(let x=0;x<w;x+=20*z)this.renderer.rect(x,0,1,h,[.35,.5,.7,.1]);for(let y=0;y<h;y+=20*z)this.renderer.rect(0,y,w,1,[.35,.5,.7,.1]);}
+    if(this.boundaries){for(const el of [...this.editor.doc.body.querySelectorAll('section,article,div,p,h1,h2,h3,figure,table,td,th,header,footer,nav')].slice(0,700)){const r=el.getBoundingClientRect();if(r.width&&r.height&&r.bottom>0&&r.top*z<h)this.renderer.border({x:r.x*z,y:r.y*z,width:r.width*z,height:r.height*z},[.3,.5,.8,.23]);}}
+    if(selected?.isConnected){const r=selected.getBoundingClientRect(),rect={x:r.x*z,y:r.y*z,width:r.width*z,height:r.height*z};if(rect.width&&rect.height&&r.bottom>0&&rect.y<h){this.renderer.border(rect,[.19,.43,.81,1],1);const label=$('#selection-label');label.hidden=false;label.textContent=selected.tagName.toLowerCase()+(selected.id?'#'+selected.id:selected.classList.length?'.'+selected.classList[0]:'');label.style.left=Math.max(0,Math.min(w-130,rect.x))+'px';label.style.top=Math.max(0,rect.y-19)+'px';const positions={nw:[0,0],n:[.5,0],ne:[1,0],e:[1,.5],se:[1,1],s:[.5,1],sw:[0,1],w:[0,.5]};if(!this.resizing){$('#resize-handles').innerHTML=selected===this.editor.doc.body?'':Object.entries(positions).filter(([,p])=>rect.y+p[1]*rect.height>=0&&rect.y+p[1]*rect.height<=h).map(([handle,p])=>`<button class="resize-handle" aria-label="Resize ${handle}" data-handle="${handle}" style="left:${rect.x+p[0]*rect.width}px;top:${rect.y+p[1]*rect.height}px"></button>`).join('');}$('#selection-dimensions').textContent=Math.round(r.width)+' × '+Math.round(r.height);}else{$('#selection-label').hidden=true;$('#resize-handles').innerHTML='';}}else{$('#selection-label').hidden=true;$('#resize-handles').innerHTML='';}this.renderer.draw();}
+  beginResize(e){const handle=e.target.closest('[data-handle]');if(!handle||!this.editor.selected)return;e.preventDefault();this.editor.flush();const el=this.editor.selected,r=el.getBoundingClientRect(),style=this.editor.frame.contentWindow.getComputedStyle(el);const contentBox=style.boxSizing!=='border-box';const extrasX=contentBox?parseFloat(style.paddingLeft)+parseFloat(style.paddingRight)+parseFloat(style.borderLeftWidth)+parseFloat(style.borderRightWidth):0,extrasY=contentBox?parseFloat(style.paddingTop)+parseFloat(style.paddingBottom)+parseFloat(style.borderTopWidth)+parseFloat(style.borderBottomWidth):0;const x=e.clientX,y=e.clientY,direction=handle.dataset.handle,original=el.getAttribute('style');this.resizing=true;$('#resize-shield').hidden=false;handle.setPointerCapture(e.pointerId);const move=event=>{const dx=(event.clientX-x)/this.zoom,dy=(event.clientY-y)/this.zoom;if(/[ew]/.test(direction))el.style.width=Math.max(8,r.width-extrasX+dx*(direction.includes('w')?-1:1))+'px';if(/[ns]/.test(direction))el.style.height=Math.max(8,r.height-extrasY+dy*(direction.includes('n')?-1:1))+'px';this.requestPaint();};const end=event=>{handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',end);handle.removeEventListener('pointercancel',end);this.resizing=false;$('#resize-shield').hidden=true;if(event.type==='pointercancel'){if(original===null)el.removeAttribute('style');else el.setAttribute('style',original);}else this.editor.commit('Resize element');this.renderInspector();this.requestPaint();};handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);}
+  renderBreadcrumbs(){const el=this.editor.selected,path=[];if(el&&isHTML(this.model.active.path)&&this.editor.doc?.body.contains(el)){let node=el;while(node&&node!==this.editor.doc.documentElement){path.unshift(node);node=node.parentElement;}}$('#tag-path').innerHTML=path.map((node,i)=>`${i?'<span class="tag-arrow">›</span>':''}<button data-node-path="${safeJSON(this.editor.nodePath(node))}">&lt;${node.tagName.toLowerCase()}${node.id?'#'+escapeHTML(node.id):node.classList.length?'.'+escapeHTML(node.classList[0]):''}&gt;</button>`).join('');if(!path.length)$('#selection-dimensions').textContent='';}
+  updateFormatting(){const el=this.editor.selected;if(!el||!el.isConnected)return;const style=this.editor.frame.contentWindow.getComputedStyle(el);const values={bold:Number(style.fontWeight)>=600,italic:style.fontStyle==='italic',underline:style.textDecorationLine.includes('underline'),left:['start','left'].includes(style.textAlign),center:style.textAlign==='center',right:style.textAlign==='right',justify:style.textAlign==='justify',ul:!!el.closest('ul'),ol:!!el.closest('ol')};for(const [key,value] of Object.entries(values)){const b=$(`#format-toolbar [data-cmd="${key}"]`);if(b)b.classList.toggle('active',value);}const block=this.editor.block();if(block&&$('#block-format option[value="'+block.tagName.toLowerCase()+'"]'))$('#block-format').value=block.tagName.toLowerCase();const fontSize=Math.round(parseFloat(style.fontSize))+'px';const sizeSelect=$('#font-size');if(![...sizeSelect.options].some(o=>o.value===fontSize)){sizeSelect.querySelector('[data-dynamic]')?.remove();const option=new Option(Math.round(parseFloat(style.fontSize)),fontSize);option.dataset.dynamic='';sizeSelect.add(option);}sizeSelect.value=fontSize;const family=$('#font-family');const font=[...family.options].find(o=>style.fontFamily.toLowerCase().startsWith(o.value.split(',')[0].replaceAll("'",'').toLowerCase()));if(font)family.value=font.value;}
+  renderInspector(){const root=$('#inspector-content');$$('[data-inspector]').forEach(b=>{b.classList.toggle('active',b.dataset.inspector===this.inspector);b.setAttribute('aria-selected',String(b.dataset.inspector===this.inspector));});if(this.inspector==='insert'){root.innerHTML='<p class="panel-description">Click to insert after the selected element, or drag a component onto the page.</p>'+['Text','Layout','Media','Elements'].map(group=>`<div class="insert-group-heading">${group}</div><div class="insert-grid">${componentLibrary.filter(c=>c.group===group).map(c=>`<button class="component-tile" data-component="${c.id}" draggable="true">${icon(c.icon)}<span>${c.name}</span></button>`).join('')}</div>`).join('');return;}
+    const el=this.editor.selected;if(!this.editor.doc||!isHTML(this.model.active.path)||this.mode==='preview'){root.innerHTML=`<div class="empty-properties">${icon(this.mode==='preview'?'preview':'code')}<strong>${this.mode==='preview'?'Preview mode':'Source file'}</strong><p>${this.mode==='preview'?'Switch to Design to select and edit elements.':'Open an HTML page to use visual properties and the element tree.'}</p><button class="secondary-button" data-cmd="${this.mode==='preview'?'design':'help'}">${this.mode==='preview'?'Return to Design':'Editor guide'}</button></div>`;return;}
+    if(this.inspector==='layers'){let count=0;const tree=(node,depth=0)=>{if(count++>800||node.matches('[data-pf-runtime],template,script,style'))return '';const children=[...node.children].filter(c=>!c.matches('template,script,style,[data-pf-runtime]'));const label=node.id?'#'+node.id:node.classList.length?'.'+node.classList[0]:node.children.length?'':node.textContent.trim().slice(0,35);return `<div class="layer-row ${node===el?'active':''}" role="button" tabindex="0" draggable="${node!==this.editor.doc.body}" data-node-path="${safeJSON(this.editor.nodePath(node))}" style="padding-left:${8+Math.min(depth,12)*11}px">${icon(children.length?'down':'code')}<span class="layer-tag">${node.tagName.toLowerCase()}</span><span class="layer-text">${escapeHTML(label)}</span></div>`+children.map(c=>tree(c,depth+1)).join('');};root.innerHTML='<p class="panel-description">Select any element. Drag a layer onto the page to move it after the target.</p><div class="layers-tree">'+tree(this.editor.doc.body)+'</div>';return;}
+    if(!el?.isConnected){root.innerHTML='<p class="panel-description">Select an element on the page to edit its properties.</p>';return;}
+    const computed=this.editor.frame.contentWindow.getComputedStyle(el),r=el.getBoundingClientRect(),tag=el.tagName.toLowerCase(),css=name=>el.style.getPropertyValue(name),placeholder=name=>computed.getPropertyValue(name),val=name=>el.getAttribute('data-pf-'+name)||el.getAttribute(name)||'';const pair=(a,b)=>`<div class="property-pair">${a}${b}</div>`;
+    root.innerHTML=`<div class="element-card"><div class="element-identity"><span class="element-tag">${escapeHTML(tag)}</span><div><div class="element-name">${escapeHTML(({h1:'Heading 1',h2:'Heading 2',h3:'Heading 3',p:'Paragraph',img:'Image',a:'Hyperlink',section:'Section',div:'Division',body:'Page body',table:'Table',td:'Table cell',th:'Header cell'})[tag]||cap(tag))}</div><div class="element-subtitle">${escapeHTML(el.textContent.trim().slice(0,80)||el.getAttribute('alt')||tag+' element')}</div></div></div><div class="element-actions"><button data-cmd="duplicate" title="Duplicate element">${icon('copy')} Duplicate</button><button data-cmd="move-up" title="Move up">${icon('up')}</button><button data-cmd="move-down" title="Move down">${icon('down')}</button><button class="action-danger" data-cmd="delete-element" title="Delete element">${icon('trash')}</button></div></div>
+    <div class="property-section"><div class="property-heading">ELEMENT <span>HTML5</span></div>${attrInput('ID','id',el.id,'element-id')}${attrInput('Class','class',el.getAttribute('class')||'','class-name')}${tag==='a'?attrInput('Link','href',val('href'),'https://…'):''}${tag==='img'?attrInput('Source','src',val('src'))+attrInput('Alt text','alt',el.getAttribute('alt')||'','Describe the image'):''}${['input','textarea','select','button'].includes(tag)?attrInput('Name','name',val('name'))+attrInput('Type','type',val('type')):''}${attrInput('Title','title',val('title'),'Tooltip (optional)')}</div>
+    <div class="property-section"><div class="property-heading">LAYOUT <span>CSS</span></div>${pair(cssInput('W','width',css('width'),Math.round(r.width)+'px'),cssInput('H','height',css('height'),Math.round(r.height)+'px'))}<label class="property-row"><span>Display</span><select data-css="display" aria-label="Display"><option value="">${placeholder('display')} (inherited)</option>${['block','inline','inline-block','flex','grid','none'].map(v=>`<option value="${v}" ${css('display')===v?'selected':''}>${v}</option>`).join('')}</select></label>${cssInput('Padding','padding',css('padding'),placeholder('padding'))}${cssInput('Margin','margin',css('margin'),placeholder('margin'))}${cssInput('Gap','gap',css('gap'),placeholder('gap'))}</div>
+    <div class="property-section"><div class="property-heading">TYPOGRAPHY</div>${cssInput('Font','font-family',css('font-family'),placeholder('font-family'))}${pair(cssInput('Size','font-size',css('font-size'),placeholder('font-size')),cssInput('Wght','font-weight',css('font-weight'),placeholder('font-weight')))}${cssInput('Height','line-height',css('line-height'),placeholder('line-height'))}${cssInput('Color','color',css('color'),placeholder('color'))}</div>
+    <div class="property-section"><div class="property-heading">APPEARANCE</div>${cssInput('Fill','background',css('background'),placeholder('background-color'))}${cssInput('Border','border',css('border'),'none')}${cssInput('Radius','border-radius',css('border-radius'),placeholder('border-radius'))}<div class="property-heading" style="margin-bottom:6px">BOX MODEL</div><div class="box-model"><span class="box-label">margin</span><span class="box-top">${parseInt(computed.marginTop)||0}</span><span class="box-bottom">${parseInt(computed.marginBottom)||0}</span><span class="box-left">${parseInt(computed.marginLeft)||0}</span><span class="box-right">${parseInt(computed.marginRight)||0}</span><div class="padding-box"><span class="box-label">padding</span><span class="box-top">${parseInt(computed.paddingTop)||0}</span><span class="box-bottom">${parseInt(computed.paddingBottom)||0}</span><span class="box-left">${parseInt(computed.paddingLeft)||0}</span><span class="box-right">${parseInt(computed.paddingRight)||0}</span><div class="content-box">${Math.round(r.width)} × ${Math.round(r.height)}</div></div></div></div>`;
+  }
+  renderSource(force=false){const file=this.model.active,input=$('#source-input');if(!file)return;if(file.kind==='data'){input.value='Binary asset: '+file.path+'\n\n'+humanBytes(bytesFromFile(file).length)+' · '+file.mime+'\n\nUse File → Export current file to download this asset.\nInsert it into an HTML page using Insert → Image.';input.readOnly=true;}else{input.readOnly=false;if(force||document.activeElement!==input){const start=input.selectionStart,end=input.selectionEnd,scroll=input.scrollTop;input.value=file.content;input.setSelectionRange(Math.min(start,input.value.length),Math.min(end,input.value.length));input.scrollTop=scroll;}}$('#source-label').textContent=extension(file.path).toUpperCase()+' source';this.renderHighlight();this.sourcePosition();}
+  renderHighlight(){const text=$('#source-input').value;const ext=extension(this.model.active.path);let html='';if(text.length>350000){html=escapeHTML(text);}else{const rx=isHTML(this.model.active.path)||ext==='svg'?/<!--[\s\S]*?-->|<![^>]*>|<\/?[a-zA-Z][^>]*>/g:/\/\*[\s\S]*?\*\/|\/\/[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:const|let|var|function|return|if|else|for|while|class|new|import|export|async|await|true|false|null)\b/g;let last=0;for(const match of text.matchAll(rx)){html+=escapeHTML(text.slice(last,match.index));const token=match[0];let cls=token.startsWith('<!--')||token.startsWith('/*')||token.startsWith('//')?'syntax-comment':token.startsWith('<')?'syntax-tag':/^["']/.test(token)?'syntax-string':'syntax-keyword';html+=`<span class="${cls}">${escapeHTML(token)}</span>`;last=match.index+token.length;}html+=escapeHTML(text.slice(last));}$('#syntax-highlight').innerHTML=html+'\n';$('#line-numbers').textContent=Array.from({length:text.split('\n').length+1},(_,i)=>i+1).join('\n');$('#syntax-highlight').scrollTop=$('#source-input').scrollTop;$('#syntax-highlight').scrollLeft=$('#source-input').scrollLeft;$('#line-numbers').scrollTop=$('#source-input').scrollTop;}
+  commitSource(refresh=true){clearTimeout(this.sourceTimer);this.sourceTimer=0;const file=this.model.active;if(!file||file.kind==='data')return;const value=$('#source-input').value;if(value===file.content)return;this.model.update(file.path,value,'Source edit');if(refresh&&this.mode==='split'&&isHTML(file.path))this.editor.load(file.path);if(refresh&&this.mode==='preview')this.renderPreview();}
+  sourcePosition(){const t=$('#source-input'),before=t.value.slice(0,t.selectionStart),line=before.split('\n').length,col=before.length-before.lastIndexOf('\n');$('#source-position').textContent=`Ln ${line}, Col ${col}`;}
+  async history(direction){this.flush();const item=this.model.restore(direction);if(!item)return;this.renderSource(true);if(isHTML(this.model.active.path)){if(this.mode==='preview')this.renderPreview();else if(this.mode!=='code')await this.editor.load(this.model.active.path,item.bookmark);}this.renderHeader();this.renderSaveState();}
+  renderPreview(){this.flush();$('#preview-frame').srcdoc=this.runtime.prepare(this.model.active.path,{design:false,channel:this.channelId});this.renderModeState();this.layout();}
+  scheduleSave(){if(!this.settings.autosave||this.autosavePaused||this.store.backend==='memory')return;clearTimeout(this.autosaveTimer);this.autosaveTimer=setTimeout(()=>this.saveNow(false),650);}
+  async saveNow(showToast=false){this.flush();clearTimeout(this.autosaveTimer);if(showToast)this.autosavePaused=false;const revision=this.model.revision,identity=this.model.data,snapshot=this.model.snapshot();$('#local-indicator').innerHTML=icon('clock')+' Saving…';this.saveChain=this.saveChain.catch(()=>{}).then(()=>this.store.write(snapshot));try{await this.saveChain;if(this.model.data===identity)this.model.savedRevision=revision;this.broadcast?.postMessage({source:this.channelId,type:'saved'});this.renderSaveState();if(showToast)this.toast('Project saved in this browser · '+this.store.backend);}catch(error){this.renderSaveState();if(showToast||!this.storageWarning){this.toast(error.message||'Save failed. Export your project to keep your work.',true);this.storageWarning=true;}}}
+  renderSaveState(){if(this.store.backend==='memory'){$('#local-indicator').innerHTML=icon('export')+' Export to save';$('#status-message').innerHTML=icon('warning')+' Memory only · export your project to keep your work';return;}const saved=this.model.revision===this.model.savedRevision;const text=this.autosavePaused?'Autosave paused':saved?'Saved locally':'Unsaved changes';$('#local-indicator').innerHTML=icon(saved?'check':'clock')+' '+text;$('#status-message').innerHTML=icon(saved?'check':'clock')+' '+(this.autosavePaused?'Autosave paused · another tab saved':saved?'Ready · saved locally':this.settings.autosave?'Editing · autosave pending':'Editing · press Ctrl+S to save');}
+  touch(label){this.model.revision++;this.model.emit('metadata',{label});}
+  toast(message,error=false){const element=document.createElement('div');element.className='toast'+(error?' error':'');element.innerHTML=icon(error?'warning':'check')+`<span>${escapeHTML(message)}</span>`;$('#toast-region').append(element);setTimeout(()=>element.remove(),error?7500:3800);}
+  modal(title,body,{ok='OK',cancel='Cancel',width=470}={}){const dialog=$('#modal');if(dialog.open)dialog.close('cancel');dialog.style.width=width+'px';dialog.innerHTML=`<form method="dialog"><div class="modal-header"><h2>${escapeHTML(title)}</h2><button value="cancel" formnovalidate aria-label="Close dialog">×</button></div><div class="modal-body">${body}</div><div class="modal-footer">${cancel?`<button value="cancel" formnovalidate>${escapeHTML(cancel)}</button>`:''}<button value="ok" class="primary-button">${escapeHTML(ok)}</button></div></form>`;dialog.returnValue='';return new Promise(resolve=>{dialog.addEventListener('close',()=>{const form=dialog.querySelector('form');resolve(dialog.returnValue==='ok'?Object.fromEntries(new FormData(form)):null);},{once:true});dialog.showModal();requestAnimationFrame(()=>{const field=dialog.querySelector('input:not([type=checkbox]),textarea,select');field?.focus();if(field?.tagName==='INPUT'&&field.type==='text')field.select();});});}
+  async newFile(){const result=await this.modal('New page or file',`<p>Create a file in your website. Use folders in the name, such as <code>pages/services.html</code>.</p>${formField('File name','path','new-page.html','text','required')}${formField('Page title','title','A new page')}<label class="field">Template<select name="template"><option value="blank">Blank page</option><option value="studio">Studio page · shared stylesheet</option><option value="landing">Landing page</option><option value="empty">Empty source file</option></select></label>`,{ok:'Create file'});if(!result)return;const path=normalizePath(result.path);let content='';if(isHTML(path)&&result.template!=='empty'){const title=result.title||'Untitled';if(result.template==='studio'){content=htmlDocument(escapeHTML(title),`<header><a class="brand" href="${relativePath(path,'index.html')}">Your studio</a><nav><a href="${relativePath(path,'index.html')}">Home</a></nav></header><main><section class="section"><h1>${escapeHTML(title)}</h1><p>Tell your story. Make this page your own.</p></section></main>`);content=content.replace('href="styles/site.css"',`href="${relativePath(path,'styles/site.css')}"`).replace('src="scripts/site.js"',`src="${relativePath(path,'scripts/site.js')}"`);}else if(result.template==='landing'){content=blankPage(title).replace('<p>Start writing your next great website.</p>',`<p style="font-size:22px;color:#778">Your next big idea deserves a great first impression.</p><a href="#features" style="display:inline-block;padding:14px 25px;background:#285ba7;color:white;text-decoration:none;border-radius:6px">Get started →</a><section id="features" style="padding:60px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:25px"><article><h2>Simple</h2><p>Designed for the things that matter.</p></article><article><h2>Powerful</h2><p>Everything you need to get started.</p></article><article><h2>Yours</h2><p>Make it your own.</p></article></section>`);}else content=blankPage(title);}else if(extension(path)==='css')content='/* Your stylesheet */\nbody {\n  margin: 0;\n  font-family: system-ui, sans-serif;\n}\n';else if(extension(path)==='js')content='// Your JavaScript\n';else if(extension(path)==='json')content='{}\n';this.model.add(path,content);await this.openFile(path);if(isHTML(path))await this.setMode('design');this.toast('Created '+path);}
+  async linkDialog(){await this.ensureDesign();const selected=this.editor.selected?.closest('a'),text=this.editor.range?.toString()||selected?.textContent||'';const pages=this.model.files.filter(f=>isHTML(f.path)).map(f=>`<option value="${escapeHTML(relativePath(this.model.active.path,f.path))}"></option>`).join('');const result=await this.modal('Insert hyperlink',`${formField('Text to display','text',text)}${formField('Address or page','href',selected?.getAttribute('href')||'','text','required list="page-addresses" placeholder="https://example.com or about.html"')}<datalist id="page-addresses">${pages}</datalist><label class="checkbox-label"><input type="checkbox" name="newtab" ${selected?.target==='_blank'?'checked':''}> Open in a new tab</label><p class="modal-note">Local website links resolve inside Preview. External links stay sandboxed while editing.</p>`,{ok:selected?'Update link':'Insert link'});if(result)this.editor.link(result.href,result.text,!!result.newtab);}
+  async imageDialog(){await this.ensureDesign();const selected=this.editor.selected?.tagName==='IMG'?this.editor.selected:null,images=this.model.files.filter(f=>/\.(svg|png|jpe?g|webp|gif|ico)$/i.test(f.path));const result=await this.modal(selected?'Image properties':'Insert image',`${formField('Image path or URL','src',selected?.getAttribute('data-pf-src')||selected?.getAttribute('src')||relativePath(this.model.active.path,images[0]?.path||'assets/image.png'),'text','required list="project-images"')}<datalist id="project-images">${images.map(f=>`<option value="${escapeHTML(relativePath(this.model.active.path,f.path))}"></option>`).join('')}</datalist><button type="button" class="secondary-button" data-cmd="upload-image">${icon('import')} Import an image from your computer</button><div style="height:14px"></div>${formField('Alternative text','alt',selected?.getAttribute('alt')||'','text','placeholder="Describe the image for screen readers"')}<div class="field-grid">${formField('Width (CSS)','width',selected?.style.width||'100%')}${formField('Height (CSS)','height',selected?.style.height||'auto')}</div>`,{ok:selected?'Apply changes':'Insert image'});if(!result)return;if(/^\s*(javascript|vbscript|data:text\/html):/i.test(result.src))throw new Error('Unsupported image URL.');for(const prop of ['width','height'])if(result[prop]&&!CSS.supports(prop,result[prop]))throw new Error('Invalid '+prop+' CSS value.');if(selected){this.editor.transaction('Image properties',()=>{selected.setAttribute('alt',result.alt);selected.setAttribute('src',result.src);selected.removeAttribute('data-pf-src');selected.style.width=result.width;selected.style.height=result.height;this.editor.resolveInserted(selected);});}else this.editor.insertHTML(`<figure style="margin:24px 0"><img src="${escapeHTML(result.src)}" alt="${escapeHTML(result.alt)}" style="width:${escapeHTML(result.width||'100%')};height:${escapeHTML(result.height||'auto')};max-width:100%"></figure>`,'Insert image');}
+  async tableDialog(){await this.ensureDesign();const result=await this.modal('Insert table',`<div class="field-grid">${formField('Rows','rows','3','number','required min="1" max="50"')}${formField('Columns','columns','3','number','required min="1" max="20"')}</div><label class="checkbox-label"><input type="checkbox" name="header" checked> First row contains column headings</label><p class="modal-note">Use the Table menu to add or remove rows and columns after insertion. Select a cell and press Tab to move between cells.</p>`,{ok:'Insert table'});if(!result)return;const rows=Math.min(50,Math.max(1,Number(result.rows)||1)),cols=Math.min(20,Math.max(1,Number(result.columns)||1));const row=(tag,index)=>'<tr>'+Array.from({length:cols},(_,i)=>`<${tag}${tag==='th'?' scope="col"':''}>${tag==='th'?'Heading '+(i+1):'Cell '+(index+1)+', '+(i+1)}</${tag}>`).join('')+'</tr>';this.editor.insertHTML(`<table style="width:100%;border-collapse:collapse;margin:24px 0">${result.header?'<thead>'+row('th',0)+'</thead>':''}<tbody>${Array.from({length:rows-(result.header?1:0)},(_,i)=>row('td',i)).join('')}</tbody></table>`,'Insert table');}
+  async htmlDialog(){await this.ensureDesign();const result=await this.modal('Insert HTML',`<p>Insert an HTML fragment after the selected block. Scripts and active embeds are removed from pasted fragments; use Code view for authored scripts.</p><label class="field">HTML fragment<textarea name="html" spellcheck="false" required>&lt;section style="padding:32px"&gt;\n  &lt;h2&gt;Make something great&lt;/h2&gt;\n  &lt;p&gt;Your content goes here.&lt;/p&gt;\n&lt;/section&gt;</textarea></label>`,{ok:'Insert HTML',width:610});if(result)this.editor.insertHTML(this.editor.sanitize(result.html),'Insert HTML');}
+  async insertComponent(id){const c=componentLibrary.find(c=>c.id===id);if(!c)return;await this.ensureDesign();let html=c.html;html=html.replace(/(href|src)="((?:assets\/|contact\.html)[^"]*)"/g,(match,attr,path)=>`${attr}="${escapeHTML(relativePath(this.model.active.path,path))}"`);this.editor.insertHTML(html,'Insert '+c.name);this.toast(c.name+' inserted');}
+  async copy(cut=false){if(this.mode==='code'){const t=$('#source-input'),text=t.value.slice(t.selectionStart,t.selectionEnd);await navigator.clipboard.writeText(text);if(cut){t.setRangeText('',t.selectionStart,t.selectionEnd,'end');t.dispatchEvent(new Event('input'));}return;}await this.ensureDesign();const range=this.editor.restoreRange(),text=range&&!range.collapsed?range.toString():this.editor.selected?.outerHTML||'';try{await navigator.clipboard.writeText(text);}catch{await this.modal('Copy selection',`<p>Clipboard access was not available. Copy the content below.</p><label class="field">Selection<textarea name="text">${escapeHTML(text)}</textarea></label>`,{ok:'Done',cancel:null,width:600});return;}if(cut){if(range&&!range.collapsed)this.editor.transaction('Cut',()=>range.deleteContents());else this.editor.remove();}this.toast(cut?'Selection cut':'Selection copied');}
+  async paste(){await this.ensureDesign();try{const text=await navigator.clipboard.readText();this.editor.insertText(text);}catch{const result=await this.modal('Paste text',`<p>Paste from your clipboard into this field.</p><label class="field">Text<textarea name="text" required></textarea></label>`,{ok:'Insert text'});if(result)this.editor.insertText(result.text);}}
+  async renameFile(path){this.flush();const result=await this.modal('Rename file',`${formField('New path','path',path,'text','required')}<p class="modal-note">Relative href, src, poster and stylesheet references in HTML files are updated. CSS url() references are updated too. JavaScript strings are not refactored.</p>`,{ok:'Rename'});if(!result)return;const next=normalizePath(result.path);if(next===path)return;if(this.model.get(next))throw new Error('A file already exists at that path.');const before=this.model.files.map(f=>({...f}));this.model.rename(path,next);this.openTabs=this.openTabs.map(p=>p===path?next:p);
+    for(const old of before){const currentPath=old.path===path?next:old.path;let content=old.content;if(old.kind==='data')continue;
+      if(isHTML(old.path)){const doc=new DOMParser().parseFromString(content,'text/html');let changed=false;for(const el of doc.querySelectorAll('[href],[src],[poster]'))for(const attr of ['href','src','poster'])if(el.hasAttribute(attr)){const raw=el.getAttribute(attr),resolved=resolvePath(old.path,raw);if(resolved===path||old.path===path&&resolved){const target=resolved===path?next:resolved,suffix=raw.match(/[?#].*$/)?.[0]||'';el.setAttribute(attr,relativePath(currentPath,target)+suffix);changed=true;}}if(changed)content='<!DOCTYPE html>\n'+doc.documentElement.outerHTML;
+      }else if(extension(old.path)==='css'){content=content.replace(/url\(\s*(["']?)([^)'"\s]+)\1\s*\)/gi,(match,quote,url)=>{const resolved=resolvePath(old.path,url);return resolved===path||old.path===path&&resolved?`url("${relativePath(currentPath,resolved===path?next:resolved)}${url.match(/[?#].*$/)?.[0]||''}")`:match;});}
+      if(content!==this.model.get(currentPath).content)this.model.update(currentPath,content,'Refactor file references');
+    }
+    await this.openFile(this.model.active.path);this.toast('Renamed to '+next);}
+  async deleteFile(path){const result=await this.modal('Delete file',`<p>Delete <strong>${escapeHTML(path)}</strong> from this project?</p><p class="modal-note">This removes the file and its undo history. Links from other pages are not removed. Export a backup before deleting files you may need later.</p>`,{ok:'Delete file'});if(!result)return;this.flush();this.model.remove(path);this.openTabs=this.openTabs.filter(p=>p!==path);await this.openFile(this.model.active.path);this.toast('Deleted '+path);}
+  async pageProperties(){if(!isHTML(this.model.active.path))throw new Error('Page properties are available for HTML files.');this.flush();const doc=new DOMParser().parseFromString(this.model.active.content,'text/html');const result=await this.modal('Page properties',`${formField('Page title','title',doc.title,'text','required')}${formField('Description','description',doc.querySelector('meta[name="description"]')?.content||'')}${formField('Language','language',doc.documentElement.lang||'en')}${formField('Project name','project',this.model.data.name)}<p class="modal-note">The title appears in the browser tab. A clear description helps people understand your page.</p>`,{ok:'Apply changes'});if(!result)return;doc.title=result.title;doc.documentElement.lang=result.language||'en';let meta=doc.querySelector('meta[name="description"]');if(!meta){meta=doc.createElement('meta');meta.name='description';doc.head.append(meta);}meta.content=result.description;this.model.update(this.model.active.path,'<!DOCTYPE html>\n'+doc.documentElement.outerHTML,'Page properties');if(this.model.data.name!==result.project){this.model.data.name=result.project||'Untitled website';this.touch('Rename project');}await this.openFile(this.model.active.path);this.toast('Page properties updated');}
+  async importSingle(file,prefix=''){if(file.size>LIMITS.fileBytes)throw new Error('File exceeds the 12 MB limit: '+file.name);let path=normalizePath(prefix+(file.webkitRelativePath||file.name)),name=path;let i=2;while(this.model.get(path)){const dot=name.lastIndexOf('.');path=dot>0?name.slice(0,dot)+'-'+i+name.slice(dot):name+'-'+i;i++;}const bytes=new Uint8Array(await file.arrayBuffer());const kind=isTextFile(path)?'text':'data',content=kind==='text'?new TextDecoder().decode(bytes):dataURI(bytes,mimeType(path));return this.model.add(path,content,kind);}
+  async importFiles(files){if(!files.length)return;try{this.flush();if(files.length===1&&/\.(pageforge|json)$/i.test(files[0].name)){if(files[0].size>LIMITS.projectBytes)throw new Error('Project exceeds 48 MB.');const text=await files[0].text();let data;try{data=JSON.parse(text);}catch{}if(data?.version&&data?.files){const valid=validateProject(data);const confirm=await this.modal('Open project',`<p>Open <strong>${escapeHTML(valid.name)}</strong> with ${valid.files.length} files?</p><p class="modal-note">This replaces the current workspace. Export your current project first to preserve it separately.</p>`,{ok:'Open project'});if(confirm)await this.replaceProject(valid);return;}}
+      if(files.length===1&&/\.zip$/i.test(files[0].name)){const entries=await readZip(await files[0].arrayBuffer());if(!entries.length)throw new Error('The ZIP contains no files.');const valid=validateProject({version:PROJECT_VERSION,name:files[0].name.replace(/\.zip$/i,''),active:'index.html',files:entries.map(f=>({path:f.path,kind:isTextFile(f.path)?'text':'data',content:isTextFile(f.path)?new TextDecoder().decode(f.bytes):dataURI(f.bytes,mimeType(f.path))})),tasks:[]});const confirm=await this.modal('Import website ZIP',`<p>Open <strong>${escapeHTML(valid.name)}</strong> with ${valid.files.length} files?</p><p class="modal-note">The archive is unpacked locally. The current workspace will be replaced.</p>`,{ok:'Open website'});if(confirm)await this.replaceProject(valid);return;}
+      if(this.model.files.length+files.length>LIMITS.files)throw new Error('Import exceeds the 512-file project limit.');if(files.reduce((n,f)=>n+f.size,0)>LIMITS.projectBytes)throw new Error('Import exceeds 48 MB.');const added=[];for(const f of files)added.push(await this.importSingle(f));const html=added.find(f=>isHTML(f.path));if(html)await this.openFile(html.path);else if(added.length===1&&!added[0].mime.startsWith('image/'))await this.openFile(added[0].path);this.renderTree();this.toast(`Imported ${added.length} file${added.length===1?'':'s'}`);
+    }catch(error){this.toast(error.message,true);}}
+  async replaceProject(data){this.editor.dispose();this.sourceTimer=0;this.model.load(data);this.model.revision++;this.openTabs=[this.model.active.path];this.runtime.cache.clear();this.collapsed.clear();$('#file-filter').value='';this.mode=isHTML(this.model.active.path)?'design':'code';this.view='page';await this.openFile(this.model.active.path);await this.saveNow(false);this.toast('Opened '+this.model.data.name);}
+  exportProject(){this.flush();downloadBlob(new Blob([JSON.stringify(this.model.snapshot(),null,2)],{type:'application/json'}),this.slug()+'.pageforge');this.toast('Project backup exported with all pages and assets');}
+  exportFile(){this.flush();const file=this.model.active;downloadBlob(new Blob([bytesFromFile(file)],{type:file.mime||mimeType(file.path)}),file.path.split('/').pop());this.toast('Exported '+file.path);}
+  exportSite(){this.flush();const entries=this.model.files.map(f=>({path:f.path,bytes:bytesFromFile(f)}));downloadBlob(createZip(entries),this.slug()+'-website.zip');this.toast('Website ZIP exported · standard HTML, CSS, JavaScript, and assets');}
+  slug(){return this.model.data.name.toLowerCase().replace(/[^a-z\d]+/g,'-').replace(/^-|-$/g,'')||'website';}
+  async publishDialog(){const result=await this.modal('Publish website',`<div class="brand-about"><span class="app-logo">${icon('globe')}</span><div><strong style="font-size:20px">Ready for the web.</strong><small>${this.model.files.length} files · standard, portable website</small></div></div><p>Export a deployment-ready ZIP containing your HTML, CSS, JavaScript, and assets. Upload its contents to GitHub Pages, Netlify, Cloudflare Pages, or any static web host.</p><p class="modal-note"><strong>No hosting account is connected to this editor.</strong> This action downloads your website; it does not upload or publish it online. Custom form delivery and server features require your own endpoint.</p><label class="checkbox-label" style="margin-top:15px"><input type="checkbox" name="backup" checked> Also download an editable PageForge project backup</label>`,{ok:'Export website',cancel:'Not now',width:510});if(result){this.exportSite();if(result.backup)setTimeout(()=>this.exportProject(),300);}}
+  async showFind(){if(this.mode!=='code'&&this.mode!=='split')await this.setMode('code');$('#find-bar').hidden=false;$('#find-input').focus();$('#find-input').select();this.updateFindCount();}
+  updateFindCount(){const q=$('#find-input').value,text=$('#source-input').value;let count=0,p=0;if(q)while((p=text.toLowerCase().indexOf(q.toLowerCase(),p))!==-1){count++;p+=Math.max(1,q.length);}$('#find-count').textContent=q?count+' found':'';}
+  findNext(){const q=$('#find-input').value;if(!q)return;const t=$('#source-input'),start=t.selectionEnd;let at=t.value.toLowerCase().indexOf(q.toLowerCase(),start);if(at<0)at=t.value.toLowerCase().indexOf(q.toLowerCase());if(at<0){this.toast('No matches found');return;}t.focus();t.setSelectionRange(at,at+q.length);const line=t.value.slice(0,at).split('\n').length;t.scrollTop=Math.max(0,(line-4)*21);t.dispatchEvent(new Event('scroll'));this.sourcePosition();}
+  replace(all=false){const q=$('#find-input').value,replace=$('#replace-input').value,t=$('#source-input');if(!q||t.readOnly)return;let count=0;if(all){const escaped=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');t.value=t.value.replace(new RegExp(escaped,'gi'),()=>{count++;return replace;});}else{if(t.value.slice(t.selectionStart,t.selectionEnd).toLowerCase()!==q.toLowerCase())this.findNext();if(t.value.slice(t.selectionStart,t.selectionEnd).toLowerCase()===q.toLowerCase()){t.setRangeText(replace,t.selectionStart,t.selectionEnd,'end');count=1;}}if(count){this.commitSource();this.renderHighlight();this.updateFindCount();this.toast(`Replaced ${count} occurrence${count===1?'':'s'}`);}}
+  formatCode(){this.flush();if(!isHTML(this.model.active.path))throw new Error('The built-in formatter handles HTML files. CSS and JavaScript source is preserved as authored.');const raw=this.model.active.content,protectedBlocks=[];let content=raw.replace(/<(pre|script|style|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi,match=>{const key=`PAGEFORGE_PROTECTED_${protectedBlocks.length}`;protectedBlocks.push(match);return key;});content=content.replace(/>\s*</g,'>\n<').split('\n').map(l=>l.trim()).filter(Boolean);let level=0;const formatted=content.map(line=>{if(/^<\//.test(line))level=Math.max(0,level-1);const out='  '.repeat(Math.min(level,20))+line;if(/^<(html|head|body|main|section|article|header|footer|nav|div|ul|ol|li|table|thead|tbody|tr|form)\b/i.test(line)&&!/<\/[^>]+>\s*$/.test(line))level++;return out;}).join('\n').replace(/PAGEFORGE_PROTECTED_(\d+)/g,(_,i)=>protectedBlocks[Number(i)]);this.model.update(this.model.active.path,formatted+'\n','Format HTML');this.renderSource(true);if(this.mode==='split')this.editor.load(this.model.active.path);this.toast('HTML source formatted');}
+  analyze(){this.flush();const issues=[],links=[],pages=[];let total=0;for(const file of this.model.files){total+=bytesFromFile(file).byteLength;if(!isHTML(file.path))continue;const doc=new DOMParser().parseFromString(file.content,'text/html');pages.push({path:file.path,title:doc.title||file.path});if(!doc.title.trim())issues.push({severity:'warning',path:file.path,detail:'The page is missing a descriptive title.'});if(!doc.documentElement.lang)issues.push({severity:'warning',path:file.path,detail:'The html element has no language attribute.'});if(!doc.querySelector('meta[name="description"]')?.content)issues.push({severity:'warning',path:file.path,detail:'The page has no meta description.'});const ids=new Set();for(const el of doc.querySelectorAll('[id]')){if(ids.has(el.id))issues.push({severity:'warning',path:file.path,detail:'Duplicate id: '+el.id});ids.add(el.id);}for(const img of doc.querySelectorAll('img'))if(!img.hasAttribute('alt'))issues.push({severity:'warning',path:file.path,detail:'An image has no alt attribute.'});for(const form of doc.querySelectorAll('form'))if(!form.getAttribute('action'))issues.push({severity:'warning',path:file.path,detail:'Form has no delivery endpoint; review its JavaScript handler.'});for(const el of doc.querySelectorAll('a[href],link[href],img[src],script[src],source[src]')){const raw=el.getAttribute('href')||el.getAttribute('src')||'',target=resolvePath(file.path,raw);let broken=false;if(target&&!this.model.get(target)){broken=true;issues.push({severity:'error',path:file.path,detail:'Missing local resource: '+raw});}else if(raw.startsWith('#')&&raw.length>1){try{const id=decodeURIComponent(raw.slice(1));if(!doc.getElementById(id)){broken=true;issues.push({severity:'warning',path:file.path,detail:'Anchor target not found: '+raw});}}catch{}}if(el.tagName==='A')links.push({from:file.path,raw,target,broken,label:el.textContent.trim()||raw,external:!target&&!raw.startsWith('#')});}}
+    return {issues,links,pages,total,broken:issues.filter(i=>i.severity==='error').length};}
+  renderSiteView(){const root=$('#site-view');if(this.view==='page'){root.hidden=true;return;}const report=this.analyze(),title=({folders:'Website folders',reports:'Website reports',navigation:'Site navigation',hyperlinks:'Hyperlinks',tasks:'Website tasks',website:'Your website'})[this.view],subtitle=({folders:'All the pieces of your website, in one place.',reports:'A local scan of links, metadata, accessibility hints, and forms.',navigation:'A page inventory rooted at the homepage. Inspect actual links in Hyperlinks view.',hyperlinks:'Inspect authored links and their local destinations. External URLs are not fetched.',tasks:'A small checklist. A better website.',website:'A familiar workspace. A whole new set of possibilities.'})[this.view];const header=`<div class="site-heading"><div><h1>${title}</h1><p>${subtitle}</p></div><button class="secondary-button" data-cmd="${this.view==='folders'?'import':'refresh'}">${icon(this.view==='folders'?'import':'refresh')} ${this.view==='folders'?'Import files':'Refresh'}</button></div>`;
+    const stats=`<div class="stats-grid"><div class="stat-card"><strong>${this.model.files.length}</strong><span>Project files</span></div><div class="stat-card"><strong>${report.pages.length}</strong><span>HTML pages</span></div><div class="stat-card"><strong>${report.broken}</strong><span>Broken resources</span></div><div class="stat-card"><strong>${humanBytes(report.total)}</strong><span>Total website size</span></div></div>`;
+    let content='';
+    if(this.view==='folders'){content=stats+`<table class="data-table"><thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Modified</th><th></th></tr></thead><tbody>${this.model.files.toSorted((a,b)=>a.path.localeCompare(b.path)).map(f=>`<tr><td><button class="file-cell" data-file="${escapeHTML(f.path)}">${icon(fileIcon(f.path))}${escapeHTML(f.path)}</button></td><td>${extension(f.path).toUpperCase()}</td><td>${humanBytes(bytesFromFile(f).length)}</td><td>${new Date(f.modified).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td><td><button class="row-button" data-cmd="rename" data-value="${escapeHTML(f.path)}" title="Rename ${escapeHTML(f.path)}">${icon('rename')}</button><button class="row-button" data-cmd="delete-file" data-value="${escapeHTML(f.path)}" title="Delete ${escapeHTML(f.path)}">${icon('trash')}</button></td></tr>`).join('')}</tbody></table>`;}
+    else if(this.view==='reports'){content=stats+`<div class="report-section-title">${report.issues.length?report.issues.length+' items to review':'All checks passed'}</div>`+(report.issues.length?`<table class="data-table"><thead><tr><th>Type</th><th>Page</th><th>Finding</th></tr></thead><tbody>${report.issues.map(i=>`<tr><td><span class="issue-badge ${i.severity==='error'?'error':''}">${icon('warning')}${cap(i.severity)}</span></td><td><button data-issue-path="${escapeHTML(i.path)}">${escapeHTML(i.path)}</button></td><td>${escapeHTML(i.detail)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty-state">${icon('check')}No missing local resources or issues in the checks performed.</div>`)+`<p class="table-note">This is a heuristic local audit, not a complete HTML or WCAG validator. External URLs, network responses, JavaScript behavior, CSS assets, and complex srcset rules are not fully validated.</p>`;}
+    else if(this.view==='navigation'){const home=report.pages.find(p=>p.path==='index.html')||report.pages[0];const card=p=>`<button class="sitemap-node" data-file="${escapeHTML(p.path)}">${icon(p.path===home.path?'home':'page')}<span>${escapeHTML(p.path)}</span><small>${escapeHTML(p.title.slice(0,40))}</small></button>`;content=home?`<div class="sitemap"><div class="sitemap-root" style="width:150px">${card(home)}</div><div class="sitemap-children">${report.pages.filter(p=>p!==home).map(card).join('')}</div></div><p class="table-note">${report.pages.length} pages · ${report.links.filter(l=>l.target).length} local hyperlinks. This inventory does not imply a parent-child routing hierarchy.</p>`:'<div class="empty-state">Create an HTML page to build your website navigation.</div>';}
+    else if(this.view==='hyperlinks'){content=`<div class="link-groups">${report.pages.map(p=>`<div class="link-group"><h3>${icon('page')} ${escapeHTML(p.path)}</h3>${report.links.filter(l=>l.from===p.path).map(l=>`<button class="${l.broken?'broken':''}" ${l.target&&this.model.get(l.target)?`data-file="${escapeHTML(l.target)}"`:`data-issue-path="${escapeHTML(l.from)}"`} title="${escapeHTML(l.raw)}">${icon(l.broken?'warning':l.external?'external':'link')}<span>${escapeHTML(l.raw)}</span></button>`).join('')||'<p class="panel-description">No links on this page.</p>'}</div>`).join('')}</div>`;}
+    else if(this.view==='tasks'){content=`<div class="task-input"><input id="new-task-input" placeholder="Add something to do…" aria-label="New task"><button class="primary-button" data-cmd="add-task">${icon('plus')} Add task</button></div><div class="task-list">${this.model.data.tasks.map(t=>`<label class="task-item ${t.done?'done':''}"><input type="checkbox" data-task-id="${escapeHTML(t.id)}" ${t.done?'checked':''}><span>${escapeHTML(t.text)}</span><button type="button" data-delete-task="${escapeHTML(t.id)}" aria-label="Delete task">${icon('close')}</button></label>`).join('')||'<div class="empty-state">Nothing on the list. Add a task above.</div>'}</div><p class="table-note">${this.model.data.tasks.filter(t=>t.done).length} of ${this.model.data.tasks.length} tasks complete. Tasks are saved in your project backup, not exported to the website.</p>`;}
+    else{content=stats+`<div class="website-card"><div><h2>${escapeHTML(this.model.data.name)}</h2><p>Design visually. Fine-tune the source. Preview on any screen. Everything you create is ordinary web code, ready to go anywhere.</p><div class="website-actions"><button class="primary-button" data-file="${escapeHTML(report.pages[0]?.path||this.model.active.path)}">${icon('design')} Edit website</button><button class="secondary-button" data-cmd="publish">${icon('export')} Export site</button></div></div>${this.model.get('assets/pavilion.svg')?`<img src="${this.runtime.asset('assets/pavilion.svg')}" alt="Sample website architecture illustration">`:'<div class="empty-state">'+icon('globe')+'Your next great website.</div>'}</div><div class="report-section-title">A familiar workflow, without the baggage.</div><p class="table-note">Your workspace is stored locally using ${this.store.backend}. Export a .pageforge project for a portable backup, or a website ZIP to publish to a static host. Imported scripts run only in the isolated Preview view.</p>`;}
+    root.innerHTML=header+content;if(this.view==='tasks')$('#new-task-input')?.addEventListener('keydown',e=>{if(e.key==='Enter')this.addTask();});}
+  addTask(){const input=$('#new-task-input'),text=input?.value.trim();if(!text)return;this.model.data.tasks.push({id:globalThis.crypto?.randomUUID?.()||String(Date.now()),text:text.slice(0,500),done:false});this.touch('Add task');this.renderSiteView();$('#new-task-input')?.focus();}
+  openMenu(button){const name=button.dataset.menu,root=$('#dropdown-menu');if(!root.hidden&&root.dataset.openMenu===name){this.closeMenu();return;}this.closeMenu();button.classList.add('open');button.setAttribute('aria-expanded','true');const menus={
+    File:[['new','New page or file…','page','Ctrl+N'],['import','Open / import…','folderOpen','Ctrl+O'],null,['save','Save locally','save','Ctrl+S'],['save-project','Save project backup…','save'],['export-file','Export current file…','export'],['export-site','Export website ZIP…','globe'],null,['rename','Rename current file…','rename'],['delete-file','Delete current file…','trash'],null,['page-properties','Page properties…','settings']],
+    Edit:[['undo','Undo','undo','Ctrl+Z'],['redo','Redo','redo','Ctrl+Shift+Z'],null,['cut','Cut','cut'],['copy','Copy','copy'],['paste','Paste','paste'],null,['select-all','Select all','section'],['duplicate','Duplicate element','copy','Ctrl+D'],['delete-element','Delete element','trash'],null,['find','Find and replace…','search','Ctrl+F']],
+    View:[['design','Design','design'],['split','Split','split'],['code','Code','code'],['preview','Preview','preview','F5'],null,['toggle-folders','Folder list','folder'],['toggle-inspector','Task pane','layers'],['boundaries','Element boundaries','grid'],['grid','Layout grid','grid'],null,['folders','Website folders','folderOpen'],['navigation','Navigation','navigation'],['hyperlinks','Hyperlinks','link']],
+    Insert:[['new','New page…','page'],['link','Hyperlink…','link','Ctrl+K'],['image','Image…','image'],['table','Table…','table'],null,['insert-heading','Heading','heading'],['insert-paragraph','Paragraph','paragraph'],['insert-divider','Horizontal line','divider'],['insert-form','Contact form','form'],null,['html','HTML fragment…','code'],['component','Component library','columns']],
+    Format:[['bold','Bold','bold','Ctrl+B'],['italic','Italic','italic','Ctrl+I'],['underline','Underline','underline','Ctrl+U'],null,['left','Align left','left'],['center','Center','center'],['right','Align right','right'],['justify','Justify','justify'],null,['ul','Bulleted list','list'],['ol','Numbered list','ordered'],['clear','Clear formatting','clear'],['format-code','Format HTML source','code']],
+    Table:[['table','Insert table…','table'],null,['table-row','Insert row after selection','plus'],['table-column','Insert column after selection','columns'],null,['table-delete-row','Delete selected row','trash'],['table-delete-column','Delete selected column','trash']],
+    Tools:[['reports','Website reports','reports'],['hyperlinks','Check local hyperlinks','link'],['tasks','Website tasks','tasks'],null,['page-properties','Page properties…','settings'],['settings','Preferences…','settings'],null,['publish','Export for publishing…','globe']],
+    Window:[['next-tab','Next document','page'],['close-tab','Close document tab','close'],null,['reset-layout','Reset workspace layout','design']],
+    Help:[['help','PageForge guide','help','F1'],['shortcuts','Keyboard shortcuts','terminal'],['about','About PageForge Studio','globe'],null,['reset-demo','Restore sample website…','refresh']]
+    };root.innerHTML=(menus[name]||[]).map(item=>item?`<button class="menu-item" role="menuitem" data-cmd="${item[0]}">${icon(item[2])}<span>${item[1]}</span><span class="menu-key">${item[3]||''}</span></button>`:'<div class="menu-divider"></div>').join('');const r=button.getBoundingClientRect();root.style.left=Math.min(r.left,window.innerWidth-260)+'px';root.style.top=r.bottom+'px';root.dataset.openMenu=name;root.hidden=false;}
+  closeMenu(){$('#dropdown-menu').hidden=true;$$('[data-menu].open').forEach(b=>{b.classList.remove('open');b.setAttribute('aria-expanded','false');});}
+  async settingsDialog(){const result=await this.modal('Preferences',`<label class="field">Workspace appearance<select name="theme"><option value="blue" ${this.settings.theme==='blue'?'selected':''}>Classic Blue</option><option value="silver" ${this.settings.theme==='silver'?'selected':''}>Classic Silver</option></select></label><label class="checkbox-label"><input type="checkbox" name="autosave" ${this.settings.autosave?'checked':''}> Save changes automatically in this browser</label><label class="checkbox-label" style="margin-top:12px"><input type="checkbox" name="spellcheck" ${this.settings.spellcheck?'checked':''}> Native spell checking in Design view</label><p class="modal-note">Storage: ${this.store.backend}<br>Renderer: ${this.renderer.mode}<br>WebGPU overlays use native HTML layout. The renderer falls back automatically when a GPU adapter is unavailable.</p>`,{ok:'Save preferences'});if(!result)return;this.settings={theme:result.theme,autosave:!!result.autosave,spellcheck:!!result.spellcheck};document.body.dataset.theme=this.settings.theme;try{localStorage.setItem('pageforge-settings',JSON.stringify(this.settings));}catch{}if(this.editor.doc)this.editor.doc.body.spellcheck=this.settings.spellcheck;if(this.settings.autosave){this.autosavePaused=false;this.scheduleSave();}this.toast('Preferences saved');}
+  async helpDialog(){await this.modal('Welcome to PageForge Studio',`<div class="brand-about"><span class="app-logo">${icon('page')}</span><div><strong>Make the web yours.</strong><small>A familiar website editor, reimagined.</small></div></div><div class="help-step"><strong>1. Start with a page</strong>Open a file in Folder List. Use File → New to create a blank, studio, or landing page. Import ordinary HTML, CSS, JavaScript, images, ZIP websites, or .pageforge backups.</div><div class="help-step"><strong>2. Design directly on the page</strong>Click text and type. Select text to format it. The Properties pane edits CSS and attributes. Insert contains draggable building blocks. Layers selects and reorders the DOM.</div><div class="help-step"><strong>3. Get close to the code</strong>Use Split or Code for source editing. The source editor includes syntax highlighting, line numbers, find/replace, Tab indentation, and HTML formatting.</div><div class="help-step"><strong>4. Check every screen</strong>Switch among desktop, tablet, and phone widths. Preview executes your local JavaScript in a sandbox. Internal page links navigate your project.</div><div class="help-step"><strong>5. Save it. Ship it.</strong>Changes save in this browser. File → Save project backup downloads an editable backup. Publish website exports standard files in a ZIP for your preferred host.</div><p class="modal-note">Design view normalizes HTML through the browser’s parser. It is not a byte-preserving source editor. Scripts are disabled in Design. Preview cannot access your editor’s storage, issue fetch requests, or submit forms to a server.</p>`,{ok:'Start creating',cancel:null,width:580});}
+  async shortcutsDialog(){await this.modal('Keyboard shortcuts',`<table class="keyboard-table">${[['Save project locally','Ctrl / ⌘ + S'],['New file','Ctrl / ⌘ + N'],['Import files','Ctrl / ⌘ + O'],['Undo','Ctrl / ⌘ + Z'],['Redo','Ctrl / ⌘ + Shift + Z'],['Bold / italic / underline','Ctrl / ⌘ + B / I / U'],['Insert hyperlink','Ctrl / ⌘ + K'],['Find and replace','Ctrl / ⌘ + F'],['Toggle preview','Ctrl / ⌘ + Enter'],['Preview','F5'],['Select parent element','Esc (in Design)'],['Next table cell','Tab (in table)'],['Indent source line','Tab (in Code)'],['Open linked project page','Ctrl / ⌘ + click (in Design)']].map(([a,b])=>`<tr><td>${a}</td><td><span class="shortcut">${b}</span></td></tr>`).join('')}</table>`,{ok:'Done',cancel:null,width:590});}
+  async aboutDialog(){await this.modal('About PageForge Studio',`<div class="brand-about"><span class="app-logo">${icon('page')}</span><div><strong>PageForge Studio</strong><small>Version ${APP_VERSION} · independent implementation</small></div></div><p>A FrontPage-inspired, local-first visual website editor built with plain HTML, CSS, and JavaScript.</p><p><strong>Rendering:</strong> Native browser DOM, CSS layout, typography, selection, and input. WebGPU renders editor overlays using instanced WGSL rectangles, with a Canvas 2D fallback.</p><p><strong>Current renderer:</strong> ${this.renderer.mode}<br><strong>Storage:</strong> ${this.store.backend}<br><strong>Runtime dependencies:</strong> None</p><p class="modal-note">This project is not affiliated with Microsoft. It does not implement FrontPage Server Extensions, ASP/database wizards, collaborative editing, or FTP publishing. It exports ordinary modern static websites.</p>`,{ok:'Done',cancel:null,width:520});}
+  async resetDemo(){const result=await this.modal('Restore sample website',`<p>Replace the current workspace with the Monograph Studio sample?</p><p class="modal-note">This replaces the current project. Export a .pageforge backup first to keep your work.</p>`,{ok:'Restore sample'});if(result)await this.replaceProject(starterProject());}
+}
+new PageForgeApp().init().catch(error=>{console.error(error);const panel=document.createElement('div');panel.style.cssText='position:fixed;inset:20%;z-index:999;background:white;padding:32px;border:1px solid #b77;font:14px/1.6 system-ui';panel.innerHTML='<h1>PageForge could not start</h1><p>'+escapeHTML(error.message)+'</p><p>Try a recent browser or serve this file from localhost.</p>';document.body.append(panel);});
+
+
+})();</script></body></html>
